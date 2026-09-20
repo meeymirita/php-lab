@@ -1,0 +1,2301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHP Lab — Vanilla Coffee Shop: чистый PHP с нуля</title>
+<style>
+  :root { --red: #6f4e9c; --red-dark: #4a3268; --red-light: #f3effa; --red-mid: #d9c9ee; --ink: #1c1c1c; }
+  body { font-family: 'DejaVu Sans', 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.6; color: var(--ink); }
+  h1 { font-size: 28px; color: var(--red); margin-bottom: 4px; }
+  .subtitle { font-size: 15px; color: #555; margin-top: 0; margin-bottom: 18px; }
+  h2 { font-size: 21px; color: var(--red-dark); border-bottom: 3px solid var(--red-mid); padding-bottom: 4px; margin-top: 44px; }
+  h3 { font-size: 16px; color: #333; margin-top: 24px; margin-bottom: 6px; }
+  h4 { font-size: 14px; color: #555; margin-top: 16px; margin-bottom: 4px; }
+  p { margin: 7px 0; }
+  code { background: #f6f2fb; padding: 1px 5px; border-radius: 3px; font-family: 'DejaVu Sans Mono', Menlo, Consolas, monospace; font-size: 12.5px; }
+  pre { background: #faf7fd; border: 1px solid #ded0ef; border-left: 4px solid var(--red); border-radius: 4px; padding: 10px 12px; font-family: 'DejaVu Sans Mono', Menlo, Consolas, monospace; font-size: 12px; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word; }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0 16px 0; font-size: 12.5px; }
+  th, td { border: 1px solid #ddd; padding: 6px 9px; text-align: left; vertical-align: top; }
+  th { background: var(--red-light); color: var(--red-dark); }
+  tr:nth-child(even) td { background: #fafafa; }
+  ul, ol { margin: 4px 0 10px 0; padding-left: 22px; }
+  li { margin: 3px 0; }
+  .tag { display: inline-block; color: #fff; font-size: 11px; font-weight: bold; padding: 1px 8px; border-radius: 3px; margin-bottom: 5px; }
+  .insight-box { background: var(--red-light); border: 1px solid var(--red-mid); border-left: 5px solid var(--red); border-radius: 4px; padding: 8px 14px; margin: 12px 0; }
+  .insight-box .tag { background: var(--red); }
+  .fix-box { background: #f1faf3; border: 1px solid #bfe4c7; border-left: 5px solid #2f9e4a; border-radius: 4px; padding: 8px 14px; margin: 6px 0 14px 0; }
+  .fix-box .tag { background: #2f9e4a; }
+  .note-box { background: #f4f4f6; border: 1px solid #d9d9e0; border-left: 5px solid #555a6e; border-radius: 4px; padding: 8px 14px; margin: 12px 0; }
+  .note-box .tag { background: #555a6e; }
+  .next-box { background: #fff8e6; border: 1px solid #f0dca0; border-left: 5px solid #e0a800; border-radius: 4px; padding: 8px 14px; margin: 14px 0 6px 0; font-size: 13px; }
+  .next-box .tag { background: #e0a800; color: #3a2a00; }
+  .next-box ul { margin: 4px 0 2px 0; }
+  details.deep { border: 1px dashed var(--red-mid); border-radius: 4px; margin: 12px 0; background: #fff; }
+  details.deep summary { cursor: pointer; padding: 8px 14px; font-weight: bold; color: var(--red-dark); background: #f2edf9; border-radius: 4px; list-style: none; }
+  details.deep summary::before { content: '▸ '; }
+  details.deep[open] summary::before { content: '▾ '; }
+  details.deep .deep-body { padding: 6px 16px 10px 16px; }
+  .toc { background: #f8f4fc; border: 1px solid #ded0ef; border-radius: 6px; padding: 14px 20px; margin: 16px 0 24px 0; }
+  .toc ol { padding-left: 18px; }
+  .small { font-size: 12px; color: #777; }
+  .fnref { color: var(--red); font-weight: bold; font-size: 0.75em; }
+  .glossary-item { margin: 0 0 10px 0; padding-left: 24px; text-indent: -24px; }
+  .glossary-item b { color: var(--red-dark); }
+  .step { margin: 22px 0 10px 0; }
+  .step-head { display: block; background: var(--red-dark); color: #fff; padding: 6px 12px; border-radius: 4px 4px 0 0; font-weight: bold; font-size: 14px; }
+  .step-head .num { display: inline-block; background: #fff; color: var(--red-dark); padding: 0 8px; border-radius: 3px; margin-right: 8px; font-size: 12.5px; }
+  .step-body { border: 1px solid var(--red-mid); border-top: none; border-radius: 0 0 4px 4px; padding: 10px 14px; }
+  .step-body pre { margin: 8px 0; }
+  .why { background: #fff8e6; border-left: 4px solid #e0a800; padding: 6px 12px; margin: 10px 0 4px 0; font-size: 13px; }
+  .why b { color: #8a6500; }
+  .file { font-family: 'DejaVu Sans Mono', Menlo, monospace; font-size: 12px; color: var(--red-dark); background: #fdecea; padding: 1px 6px; border-radius: 3px; }
+  .session-banner { background: linear-gradient(90deg, var(--red-dark), var(--red)); color: #fff; padding: 10px 16px; border-radius: 6px; margin: 28px 0 12px 0; font-size: 17px; font-weight: bold; }
+  .session-banner span { font-weight: normal; font-size: 12px; opacity: 0.9; margin-left: 10px; }
+  .page-break { display: none; }
+  .life { font-family: 'DejaVu Sans Mono', Menlo, monospace; font-size: 12px; }
+
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #fff; }
+  .layout { display: flex; align-items: flex-start; }
+  .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; width: 300px; flex: 0 0 300px; background: var(--red-dark); color: #fff; padding: 52px 12px 16px 12px; box-sizing: border-box; font-size: 12.5px; transition: margin-left .2s; }
+  body.nav-collapsed .sidebar { margin-left: -300px; }
+  .sidebar .nav-title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 8px; }
+  .sidebar ul { list-style: none; padding-left: 0; margin: 0; }
+  .sidebar li { margin: 1px 0; }
+  .sidebar a { color: #fff; text-decoration: none; display: block; padding: 4px 8px; border-radius: 4px; }
+  .sidebar a:hover { background: #fff; color: var(--red-dark); }
+  .sidebar .nav-steps { padding-left: 8px; border-left: 2px solid rgba(255,255,255,.4); margin: 4px 0 6px 8px; }
+  .sidebar .nav-steps a { font-size: 11.5px; color: #e2d3f0; }
+  .sidebar .nav-steps a:hover { color: var(--red-dark); }
+  .sidebar .nav-session a { color: #fff; font-weight: bold; margin-top: 6px; background: rgba(255,255,255,.12); }
+  .sidebar a .mark { display: inline-block; width: 14px; color: #fff; font-weight: bold; }
+  .sidebar a.done { opacity: .75; }
+  .sidebar a.done .mark::before { content: '✓'; }
+  .sidebar .progress { margin: 6px 0 12px 0; }
+  .sidebar .bar { height: 8px; background: rgba(255,255,255,.25); border-radius: 4px; overflow: hidden; }
+  .sidebar .fill { height: 100%; width: 0; background: #fff; transition: width .3s; }
+  .sidebar .ptext { font-size: 11px; margin-top: 4px; color: #e2d3f0; }
+  .sidebar .reset { margin-top: 16px; background: transparent; border: 1px solid rgba(255,255,255,.5); color: #fff; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+  .sidebar .reset:hover { background: #fff; color: var(--red-dark); }
+  #nav-toggle { position: fixed; top: 10px; left: 10px; z-index: 20; background: var(--red); color: #fff; border: none; border-radius: 6px; width: 38px; height: 34px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+  #nav-toggle:hover { background: var(--red-dark); }
+  main { flex: 1; max-width: 960px; padding: 24px 44px 90px 44px; box-sizing: border-box; min-width: 0; }
+  body.nav-collapsed main { padding-left: 64px; }
+  h2, .step, .glossary-item, .session-banner { scroll-margin-top: 16px; }
+  a { color: var(--red); }
+  a.anchor { color: #c4a9de; text-decoration: none; margin-left: 6px; font-weight: normal; font-size: 0.8em; opacity: 0; }
+  h2:hover a.anchor, .step-head:hover a.anchor { opacity: 1; }
+  .step-head a.anchor { color: #fff; float: right; }
+  a.fnref { text-decoration: none; vertical-align: super; padding: 0 2px; }
+  a.fnref:hover { background: var(--red-light); border-radius: 3px; }
+  a.back { text-decoration: none; font-size: 0.9em; color: #9b7bc0; margin-left: 4px; }
+  .glossary-item:target, .step:target { outline: 2px solid var(--red); outline-offset: 4px; border-radius: 4px; }
+  h2:target { background: var(--red-light); }
+  .done-label { display: inline-block; margin-right: 8px; vertical-align: middle; }
+  .done-label input { width: 18px; height: 18px; accent-color: var(--red); cursor: pointer; vertical-align: middle; }
+  .step-head .done-label input { accent-color: #fff; }
+  h2.is-done { color: #999; border-bottom-color: #ddd; }
+  .step.is-done .step-head { background: #9e9e9e; }
+  .step.is-done .step-body { border-color: #ddd; }
+  .totop { position: fixed; right: 24px; bottom: 24px; background: var(--red); color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  @media (max-width: 900px) { .sidebar { position: fixed; z-index: 10; } main { padding: 56px 16px 60px 16px; } body.nav-collapsed main { padding-left: 16px; } }
+  @media print { .sidebar, .totop, #nav-toggle, a.anchor, a.back, .done-label { display: none; } .layout { display: block; } main { max-width: none; padding: 0; } a { color: inherit; text-decoration: none; } details.deep { border: none; } details.deep summary { display: none; } details.deep .deep-body { display: block; } }
+</style>
+</head>
+<body id="top">
+<button id="nav-toggle">✕</button>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+<div class="nav-title">🐘 PHP Lab — Vanilla Coffee</div>
+<div class="progress"><div class="bar"><div class="fill" id="progress-fill"></div></div><div class="ptext" id="progress-text">0 / 0</div></div>
+<ul>
+<li><a href="#sec-1" data-key="sec-1"><span class="mark"></span>1. Зачем это</a>
+</li>
+<li><a href="#sec-2" data-key="sec-2"><span class="mark"></span>2. Типы и приведение</a>
+</li>
+<li><a href="#sec-3" data-key="sec-3"><span class="mark"></span>3. Массивы</a>
+</li>
+<li><a href="#sec-4" data-key="sec-4"><span class="mark"></span>4. Строки</a>
+</li>
+<li><a href="#sec-5" data-key="sec-5"><span class="mark"></span>5. Суперглобалы</a>
+</li>
+<li><a href="#sec-6" data-key="sec-6"><span class="mark"></span>6. Обработка ошибок</a>
+</li>
+<li><a href="#sec-7" data-key="sec-7"><span class="mark"></span>7. Замыкания и callable</a>
+</li>
+<li><a href="#sec-8" data-key="sec-8"><span class="mark"></span>8. Генераторы и Iterator</a>
+</li>
+<li><a href="#sec-9" data-key="sec-9"><span class="mark"></span>9. Магические методы</a>
+</li>
+<li><a href="#sec-10" data-key="sec-10"><span class="mark"></span>10. match и nullsafe</a>
+</li>
+<li><a href="#sec-11" data-key="sec-11"><span class="mark"></span>11. Composer и PSR-4</a>
+</li>
+<li><a href="#sec-12" data-key="sec-12"><span class="mark"></span>12. Архитектура практики</a>
+</li>
+<li><a href="#sec-13" data-key="sec-13"><span class="mark"></span>13. Задания (8 сессий)</a>
+<ul class="nav-steps">
+<li class="nav-session"><a href="#session-1">Сессия 1</a></li>
+<li><a href="#step-1-1" data-key="step-1-1"><span class="mark"></span>1.1 Стенд</a></li>
+<li><a href="#step-1-2" data-key="step-1-2"><span class="mark"></span>1.2 strict_types + таблица ==</a></li>
+<li class="nav-session"><a href="#session-2">Сессия 2</a></li>
+<li><a href="#step-2-1" data-key="step-2-1"><span class="mark"></span>2.1 Copy-on-write: измеряем момент копиро…</a></li>
+<li><a href="#step-2-2" data-key="step-2-2"><span class="mark"></span>2.2 array_filter vs usort: ключи и мутация</a></li>
+<li><a href="#step-2-3" data-key="step-2-3"><span class="mark"></span>2.3 mb_* на кириллице + sprintf + regex</a></li>
+<li class="nav-session"><a href="#session-3">Сессия 3</a></li>
+<li><a href="#step-3-1" data-key="step-3-1"><span class="mark"></span>3.1 Предскажи → проверь: $_GET и приведен…</a></li>
+<li><a href="#step-3-2" data-key="step-3-2"><span class="mark"></span>3.2 php://input: JSON-тело запроса</a></li>
+<li><a href="#step-3-3" data-key="step-3-3"><span class="mark"></span>3.3 finally vs exception handler: порядок</a></li>
+<li class="nav-session"><a href="#session-4">Сессия 4</a></li>
+<li><a href="#step-4-1" data-key="step-4-1"><span class="mark"></span>4.1 Прочитать и предсказать: use ($var) v…</a></li>
+<li><a href="#step-4-2" data-key="step-4-2"><span class="mark"></span>4.2 Генератор vs жадное чтение: измеряем …</a></li>
+<li><a href="#step-4-3" data-key="step-4-3"><span class="mark"></span>4.3 Свой фасад: __callStatic по шагам</a></li>
+<li><a href="#step-4-4" data-key="step-4-4"><span class="mark"></span>4.4 match + nullsafe: неполные данные зак…</a></li>
+<li class="nav-session"><a href="#session-5">Сессия 5</a></li>
+<li><a href="#step-5-1" data-key="step-5-1"><span class="mark"></span>5.1 PSR-4: до и после автозагрузки</a></li>
+<li><a href="#step-5-2" data-key="step-5-2"><span class="mark"></span>5.2 Роутер v1 (наивный) → v2 (regex-парам…</a></li>
+<li class="nav-session"><a href="#session-6">Сессия 6</a></li>
+<li><a href="#step-6-1" data-key="step-6-1"><span class="mark"></span>6.1 Боль без контейнера: ручное связывание</a></li>
+<li><a href="#step-6-2" data-key="step-6-2"><span class="mark"></span>6.2 Контейнер v1: явные фабрики + singlet…</a></li>
+<li><a href="#step-6-3" data-key="step-6-3"><span class="mark"></span>6.3 Контейнер v2: autowiring через Reflec…</a></li>
+<li class="nav-session"><a href="#session-7">Сессия 7</a></li>
+<li><a href="#step-7-1" data-key="step-7-1"><span class="mark"></span>7.1 SQL-инъекция: найти → исправить</a></li>
+<li><a href="#step-7-2" data-key="step-7-2"><span class="mark"></span>7.2 Транзакция: rollBack после частичного…</a></li>
+<li><a href="#step-7-3" data-key="step-7-3"><span class="mark"></span>7.3 CSRF своими руками: сессия + hash_equ…</a></li>
+<li><a href="#step-7-4" data-key="step-7-4"><span class="mark"></span>7.4 Свой .env-парсер: строка "true" ≠ true</a></li>
+<li class="nav-session"><a href="#session-8">Сессия 8</a></li>
+<li><a href="#step-8-1" data-key="step-8-1"><span class="mark"></span>8.1 Сборка index.php: предсказать поток, …</a></li>
+<li><a href="#step-8-2" data-key="step-8-2"><span class="mark"></span>8.2 Middleware-цепочка: предсказать поряд…</a></li>
+<li><a href="#step-8-3" data-key="step-8-3"><span class="mark"></span>8.3 Финал: тесты + таблица «что даёт Lara…</a></li>
+</ul>
+</li>
+<li><a href="#sec-14" data-key="sec-14"><span class="mark"></span>14. Чек-лист концепций</a>
+</li>
+<li><a href="#sec-15" data-key="sec-15"><span class="mark"></span>15. Глоссарий</a>
+</li>
+<li><a href="#sec-16" data-key="sec-16"><span class="mark"></span>16. Вопросы на понимание</a>
+</li>
+<li><a href="#sec-17" data-key="sec-17"><span class="mark"></span>17. Что дальше</a>
+</li>
+</ul><button class="reset" id="reset-progress" title="Сбросить все галочки">Сбросить прогресс</button></nav>
+<main>
+
+<h1>🐘 PHP Lab — Vanilla Coffee Shop</h1>
+<p class="subtitle">Чистый PHP 8.4 с нуля: от strict_types и copy-on-write массивов до собственного роутера, DI-контейнера и PDO-слоя — без единого фреймворка. Домен — та же кофейня, что в ООП-лабе, но здесь вы пишете инфраструктуру, которую там давал Laravel. Стек: PHP 8.4 CLI, встроенный dev-сервер, PostgreSQL через голый PDO, Composer только для автозагрузки.</p>
+
+<div class="toc"><b>Как устроена лаба.</b> Разделы 1-12 — теория языка и рантайма: типы и приведение, массивы как значения с copy-on-write, строки и multibyte, суперглобалы, исключения, замыкания и генераторы, магические методы, современный синтаксис, Composer и автозагрузка, архитектура практики. Раздел 13 — восемь сессий: язык (сессии 1-4) → инфраструктура своими руками — роутер, DI-контейнер, PDO, сессии/CSRF (сессии 5-7) → финал: REST API на кофейне и сравнение с Laravel (сессия 8). Каждый шаг: код → «зачем» → команда → ожидаемый результат → «проверь себя». Разделы 14-17 — чек-лист, глоссарий, вопросы для собеседования, что дальше.
+<p class="small">Отдельный репозиторий, ни от чего не зависит — код полностью свой, домен (меню/заказы/оплата) лишь концептуально тот же, что в ООП-лабе, для финального сравнения «что даёт фреймворк». Composer используется только как автозагрузчик (PSR-4), без единого стороннего пакета до сессии 7 (где потребуется <code>pdo_pgsql</code> — расширение PHP, не composer-пакет). Если ООП-принципы (инкапсуляция, полиморфизм, Value Object) ещё не улеглись — вернитесь к ООП-лабе; здесь они предполагаются известными и используются без объяснений.</p></div>
+
+<h2 id="sec-1"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-1"></label>1. Зачем это: что скрывает фреймворк <a class="anchor" href="#sec-1">#</a></h2>
+
+<p>Файл <code>index.php</code>, который принимает запрос без единого фреймворка:</p>
+<pre><code>&lt;?php
+// index.php — так выглядит "сырой" PHP-скрипт эпохи до фреймворков
+
+if ($_SERVER['REQUEST_URI'] === '/menu' &amp;&amp; $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $pdo = new PDO('pgsql:host=postgres;dbname=coffee', 'coffee', 'coffee');
+    $stmt = $pdo-&gt;query('SELECT * FROM drinks');
+    header('Content-Type: application/json');
+    echo json_encode($stmt-&gt;fetchAll());
+    exit;
+}
+
+if ($_SERVER['REQUEST_URI'] === '/orders' &amp;&amp; $_SERVER['REQUEST_METHOD'] === 'POST') {
+    // а сюда что? Ещё один if? А если маршрутов 40? А кто проверит CSRF? А кто откроет соединение с БД для КАЖДОГО if по отдельности?
+    // а если два разработчика одновременно правят этот файл?
+}
+
+echo '404 Not Found';</code></pre>
+
+<p>Работает при трёх маршрутах. При сорока — нечитаемо. При двух разработчиках — конфликты на каждый коммит. Это ровно то состояние индустрии, из которого выросли Laravel, Symfony и остальные — и ровно то, что вы соберёте сами в этой лабе, шаг за шагом, чтобы увидеть швы, а не только готовый результат.</p>
+<table>
+<tr><th>Проблема "сырого" PHP</th><th>Что это провоцирует</th><th>Где решаем в лабе</th></tr>
+<tr><td>Маршруты — цепочка <code>if</code></td><td>линейный рост сложности, невозможно вынести в отдельные файлы осмысленно</td><td>сессия 5: свой роутер</td></tr>
+<tr><td>Каждый контроллер сам создаёт зависимости (<code>new PDO(...)</code>)</td><td>дублирование, нельзя подменить в тестах, нельзя настроить в одном месте</td><td>сессия 6: свой DI-контейнер</td></tr>
+<tr><td>SQL и логика вперемешку</td><td>SQL-инъекции при неаккуратной конкатенации, невозможно переиспользовать запросы</td><td>сессия 7: PDO с prepared statements</td></tr>
+<tr><td>Сессии/CSRF — "как получится"</td><td>уязвимости, дублирование кода проверки токена в каждой форме</td><td>сессия 7: сессии и CSRF руками</td></tr>
+<tr><td>Конфигурация — захардкожена в коде</td><td>секреты в git, невозможно сменить окружение без правки кода</td><td>сессия 7: свой .env-парсер</td></tr>
+</table>
+<div class="insight-box"><span class="tag">ГЛАВНАЯ МЫСЛЬ ЛАБЫ</span><p>Laravel — не магия, а решённые версии ровно этих пяти проблем, упакованные в классы с удобным API. Вы уже пользовались Container, Router, Eloquent как потребитель (Laravel-лаба). Здесь вы напишете упрощённые, но РАБОТАЮЩИЕ версии первых двух своими руками — не потому что в проде стоит изобретать велосипед, а потому что после этого строка <code>Route::get('/menu', [MenuController::class, 'index'])</code> перестанет быть заклинанием и станет понятным вам кодом.</p></div>
+<div class="next-box"><span class="tag">ПЕРЕД РАЗДЕЛОМ <a href="#sec-2">2</a></span><ul>
+<li>📖 Пробежаться: <a href="https://www.php.net/manual/ru/language.types.php" target="_blank">PHP: Types</a> — держать открытым как справочник.</li>
+<li>✅ Docker; ООП-лаба пройдена (принципы инкапсуляции/полиморфизма используются без повторного объяснения).</li>
+</ul></div>
+
+<h2 id="sec-2"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-2"></label>2. Типы, приведение, strict_types <a class="anchor" href="#sec-2">#</a></h2>
+
+<h3>2.1 declare(strict_types=1) — переключатель на весь файл</h3>
+<p>По умолчанию PHP — язык со слабой типизацией: параметр с аннотацией <code>int</code> тихо примет строку <code>"5"</code> и приведёт её. <code>declare(strict_types=1)</code> в начале файла (обязательно первой строкой после <code>&lt;?php</code>) отключает это ТОЛЬКО для вызовов функций/методов ИЗ ЭТОГО ФАЙЛА — не глобальная настройка, а атрибут файла.</p>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+function addQty(int $a, int $b): int { return $a + $b; }
+
+addQty(2, 3);          // 5 — ок, оба int
+addQty('2', 3);        // TypeError: Argument #1 ($a) must be of type int, string given
+                         // БЕЗ strict_types эта же строка тихо сработала бы: '2' привелось бы к 2</code></pre>
+
+<p><b>Важная деталь:</b> strict_types проверяется в файле, откуда идёт ВЫЗОВ, а не в файле, где объявлена функция. Если <code>addQty</code> объявлена в файле со strict_types, но вызвана из файла БЕЗ него — сработает слабая типизация вызывающей стороны.</p>
+
+<h3>2.2 == vs === в PHP: таблица, которая изменилась между PHP 7 и PHP 8</h3>
+<pre><code>0 == 'abc'         // PHP 7: true (строка "abc" приводилась к 0)  |  PHP 8: false — ИЗМЕНЕНО, теперь 0 приводится к '0', сравнение строк
+0 == ''            // PHP 7: true   |  PHP 8: false — та же причина
+0 == '0'           // true в обеих версиях — '0' валидно приводится к числу 0
+'1' == '01'        // true — обе валидные числовые строки, сравниваются как числа: 1 == 1
+'10' == '1e1'      // true — '1e1' валидная числовая строка (10 в экспоненциальной записи)
+100 == '1e2'        // true — та же причина
+null == false       // true — оба приводятся к false
+null == 0           // true — null приводится к 0 (В ОТЛИЧИЕ от JavaScript, где null == 0 это false!)
+'' == null          // true
+[] == false          // true</code></pre>
+<details class="deep"><summary>🔬 Под капотом: PHP 8 vs JS: null == 0 — противоположные ответы в двух языках</summary><div class="deep-body">
+
+<p>В JavaScript (JS-лаба, раздел 3) <code>null == 0</code> — <code>false</code>: спецификация ECMAScript говорит, что <code>null</code> равен ТОЛЬКО <code>undefined</code> и больше никому. В PHP <code>null == 0</code> — <code>true</code>: PHP приводит <code>null</code> к числу 0, затем сравнивает как числа. Одинаковый синтаксис (<code>==</code>), одинаковая идея «нестрогое сравнение», но разные конкретные правила — единственный надёжный способ не путаться между языками — всегда проверять конкретный случай в документации, а не полагаться на интуицию, перенесённую из другого языка.</p>
+</div></details>
+
+<h3>2.3 Приведение типов: явное и правила</h3>
+<pre><code>(int) '42abc'       // 42 — PHP берёт числовой префикс строки, не бросает ошибку (в отличие от Number() в JS, который дал бы NaN)
+(int) 'abc'         // 0
+(int) 3.9            // 3 — ОТБРАСЫВАЕТ дробную часть, не округляет!
+(bool) '0'           // false — единственная НЕпустая строка, которая ложна
+(bool) '0.0'         // true — а вот это уже истинно! Строка "0.0" не равна строке "0"
+(bool) []             // false
+(bool) [0]            // true — непустой массив истинен, даже если единственный элемент — 0
+(string) true         // "1"
+(string) false        // "" (пустая строка)
+(string) null         // "" (пустая строка, БЕЗ warning в 8.x для обычных операций)</code></pre>
+
+<h3>2.4 Union types, nullable, mixed (PHP 8+)</h3>
+<pre><code>function formatPrice(int|float $amount, ?string $currency = null): string {   // union type + nullable через ?
+    return number_format($amount, 2) . ' ' . ($currency ?? 'RUB');
+}
+formatPrice(250);              // "250.00 RUB"
+formatPrice(250.5, 'USD');     // "250.50 USD"
+
+function processAny(mixed $value): void { /* mixed = "любой тип", ноль проверок компилятором, честная альтернатива отсутствию типа */ }</code></pre>
+<p>Правило лабы: <b>всегда <code>declare(strict_types=1)</code></b> и <b>всегда <code>===</code></b> в новом коде (то же правило, что в JS-лабе для <code>==</code> vs <code>===</code>) — единственное осмысленное исключение для <code>==</code> в PHP отсутствует настолько же чётко, как <code>x == null</code> в JS, поэтому здесь правило даже строже.</p>
+<h2 id="sec-3"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-3"></label>3. Массивы: значения с copy-on-write, функции, by-value vs by-reference <a class="anchor" href="#sec-3">#</a></h2>
+
+<h3>3.1 PHP-массив — не то же самое, что JS-массив</h3>
+<p>В JavaScript массив — объект, передаётся по ссылке (JS-лаба, раздел 4: <code>{ ...obj }</code> — поверхностная копия, которую приходится делать явно). В PHP массив — <b>значение</b>, как число или строка: присваивание копирует его целиком (логически), и функция получает СВОЮ копию, если не указано иное.</p>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+$a = [1, 2, 3];
+$b = $a;              // "копия" — но НЕ обязательно физическое копирование памяти прямо сейчас (см. "под капотом")
+$b[] = 4;
+var_dump($a);          // [1, 2, 3] — НЕ ИЗМЕНИЛСЯ
+var_dump($b);          // [1, 2, 3, 4]
+
+function addItem(array $items): array {         // массив передаётся ПО ЗНАЧЕНИЮ
+    $items[] = 'new';
+    return $items;
+}
+$original = ['a', 'b'];
+$modified = addItem($original);
+var_dump($original);    // ['a', 'b'] — функция не смогла изменить оригинал
+var_dump($modified);     // ['a', 'b', 'new']
+
+function addItemByRef(array &amp;$items): void {      // &amp; — ПО ССЫЛКЕ, явно запрошено
+    $items[] = 'new';
+}
+addItemByRef($original);
+var_dump($original);      // ['a', 'b', 'new'] — теперь изменился, потому что явно передали по ссылке</code></pre>
+<details class="deep"><summary>🔬 Под капотом: copy-on-write: почему $b = $a не копирует память сразу</summary><div class="deep-body">
+
+<p>PHP не копирует содержимое массива в момент присваивания <code>$b = $a</code> — оба указывают на одну внутреннюю структуру данных (zval с refcount), пока никто её не меняет. Физическое копирование происходит ЛЕНИВО, в момент первой попытки ИЗМЕНИТЬ одну из копий (<code>$b[] = 4</code>) — движок видит refcount &gt; 1, делает реальную копию именно в этот момент, и только тогда изменения расходятся. Это оптимизация: если вы просто читаете <code>$b</code>, никогда не меняя, копирование не произойдёт вообще, экономя память и время. Механизм называется copy-on-write (COW) и специфичен для PHP — в JS у объектов/массивов нет аналога, там всегда общая ссылка, пока не скопируете явно.</p>
+</div></details>
+
+<h3>3.2 Индексированные и ассоциативные — на самом деле одна структура</h3>
+<pre><code>$indexed = ['espresso', 'latte', 'cappuccino'];              // ключи 0, 1, 2 — НЕЯВНО
+$assoc = ['espresso' =&gt; 150, 'latte' =&gt; 250];                   // ключи заданы явно
+$mixed = [0 =&gt; 'a', 'name' =&gt; 'b', 5 =&gt; 'c', 'd'];             // МОЖНО смешивать; следующий неявный ключ после 5 будет 6, не 3!
+
+foreach ($assoc as $key =&gt; $value) { echo "$key: $value\n"; }    // порядок ВСТАВКИ сохраняется — не алфавитный, не числовой</code></pre>
+
+<h3>3.3 Функции массивов, которые реально нужны каждый день</h3>
+<table>
+<tr><th>Функция</th><th>Делает</th><th>Мутирует?</th></tr>
+<tr><td><code>array_map(fn, $arr)</code></td><td>преобразовать каждый элемент</td><td>нет, новый массив</td></tr>
+<tr><td><code>array_filter($arr, fn)</code></td><td>оставить подходящие; БЕЗ fn — убрать falsy</td><td>нет; <b>СОХРАНЯЕТ КЛЮЧИ</b> — часто нужен array_values() следом</td></tr>
+<tr><td><code>array_reduce($arr, fn, $initial)</code></td><td>свернуть в одно значение</td><td>нет</td></tr>
+<tr><td><code>array_walk(&$arr, fn)</code></td><td>применить fn к каждому элементу НА МЕСТЕ (по ссылке)</td><td><b>да</b> — единственная из четырёх, что мутирует</td></tr>
+<tr><td><code>usort($arr, fn)</code></td><td>сортировка с компаратором</td><td><b>да</b>, по ссылке; сбрасывает ключи</td></tr>
+<tr><td><code>array_column($arr, 'col', 'idx')</code></td><td>вытащить один столбец из массива массивов/объектов</td><td>нет</td></tr>
+<tr><td><code>array_merge</code> vs <code>+</code></td><td>merge: числовые ключи переиндексируются, строковые — правый побеждает; <code>+</code>: строковые ключи — ЛЕВЫЙ побеждает, числовые НЕ переиндексируются</td><td>нет, но результаты РАЗНЫЕ — частая ошибка</td></tr>
+<tr><td><code>array_combine($keys, $values)</code></td><td>собрать ассоциативный массив из двух списков</td><td>нет</td></tr>
+<tr><td><code>compact(...)</code> / <code>extract($arr)</code></td><td>переменные → массив / массив → переменные</td><td>extract МУТИРУЕТ текущую область видимости — используется редко, риск перезаписать существующие переменные</td></tr>
+</table>
+<pre><code>$drinks = [
+    ['name' =&gt; 'Эспрессо', 'price' =&gt; 150, 'category' =&gt; 'coffee'],
+    ['name' =&gt; 'Латте', 'price' =&gt; 250, 'category' =&gt; 'coffee'],
+    ['name' =&gt; 'Чай', 'price' =&gt; 120, 'category' =&gt; 'tea'],
+];
+
+$names = array_column($drinks, 'name');                          // ['Эспрессо', 'Латте', 'Чай']
+$byName = array_column($drinks, 'price', 'name');                 // ['Эспрессо' =&gt; 150, 'Латте' =&gt; 250, 'Чай' =&gt; 120]
+
+$expensive = array_filter($drinks, fn($d) =&gt; $d['price'] &gt; 130);   // СОХРАНЯЕТ ключи 0 и 1, ключ 2 (чай) удалён — array_values($expensive) для переиндексации
+
+usort($drinks, fn($a, $b) =&gt; $a['price'] &lt;=&gt; $b['price']);         // &lt;=&gt; spaceship operator: -1/0/1, идеален для usort
+
+$total = array_reduce($drinks, fn($carry, $d) =&gt; $carry + $d['price'], 0);   // 520</code></pre>
+<details class="deep"><summary>🔬 Под капотом: array_merge vs + — конкретная ловушка на числовых ключах</summary><div class="deep-body">
+
+<pre><code>$a = ['espresso' => 150, 0 => 'first'];
+$b = ['espresso' => 200, 0 => 'second'];
+
+array_merge($a, $b);   // ['espresso' => 200, 0 => 'first', 1 => 'second']
+                        //   строковый ключ: ПРАВЫЙ побеждает (200)
+                        //   числовые ключи: ОБА элемента остаются, переиндексированы заново (0 и 1)
+
+$a + $b;                // ['espresso' => 150, 0 => 'first']
+                        //   строковый ключ: ЛЕВЫЙ побеждает (150)
+                        //   числовой ключ 0: ЛЕВЫЙ побеждает, элемент из $b с тем же ключом ПРОПАДАЕТ</code></pre>
+<p>Смешение числовых и строковых ключей в одном массиве — источник этой путаницы; на чисто ассоциативных массивах (только строковые ключи) поведение <code>array_merge</code> и <code>+</code> отличается только тем, кто побеждает при совпадении — предсказуемо в обе стороны.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Что вернёт <code>array_filter([0, 1, 2, '', 'a', null, false])</code> без второго аргумента? Перечислите, какие элементы останутся и почему (вспомните таблицу falsy — но это PHP falsy, не JS!).</li><li>Почему <code>array_walk</code> принимает массив по ссылке (<code>&$arr</code>) в объявлении функции, а <code>array_map</code> — нет? Что было бы, если бы <code>array_map</code> тоже мутировал?</li></ul></div>
+
+<h2 id="sec-4"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-4"></label>4. Строки: multibyte, sprintf, регулярки <a class="anchor" href="#sec-4">#</a></h2>
+
+<h3>4.1 mb_* функции: почему обычные strlen/substr ломаются на кириллице</h3>
+<pre><code>$name = 'Латте';
+echo strlen($name);          // 10 — а не 5! strlen считает БАЙТЫ, каждая кириллическая буква в UTF-8 занимает 2 байта
+echo mb_strlen($name);        // 5 — правильно, считает СИМВОЛЫ
+
+echo substr($name, 0, 2);      // "Ð" (мусор) — обрезал байты посередине многобайтового символа
+echo mb_substr($name, 0, 2);    // "Ла" — корректно
+
+echo strtoupper($name);         // "Латте" — НЕ РАБОТАЕТ для не-ASCII без указания локали
+echo mb_strtoupper($name);       // "ЛАТТЕ" — работает корректно для UTF-8</code></pre>
+<p><b>Правило лабы: для любого текста, который потенциально не чистый ASCII (то есть почти всегда) — только mb_* функции.</b> Забыть mb_ префикс на кириллице/эмодзи — один из самых частых и незаметных багов в PHP-проектах с русским языком.</p>
+<h3>4.2 sprintf — форматирование без конкатенации</h3>
+<pre><code>$price = 1234.5;
+sprintf('%.2f ₽', $price);              // "1234.50 ₽"
+sprintf('%05d', 42);                     // "00042" — дополнить нулями до 5 знаков
+sprintf('%-10s|', 'латте');               // "латте|" — БЕЗ дополнения: ширина в sprintf считается в БАЙТАХ, а "латте" уже 10 байт в UTF-8 (5 букв × 2 байта)
+sprintf('%-15s|', 'латте');               // "латте     |" — а вот тут дополнение видно: до 15 байт не хватает 5, они и стали пробелами
+sprintf('%1$s стоит %2$d ₽, скидка на %1$s — 10%%', 'латте', 250);   // позиционные аргументы: %1$s переиспользуется; %% — литеральный процент</code></pre>
+
+<h3>4.3 preg_* — регулярные выражения</h3>
+<pre><code>preg_match('/^\d{3}-\d{4}$/', '123-4567', $matches);         // 1 (найдено); $matches[0] — вся строка целиком
+preg_match_all('/\d+/', 'заказ 5 латте по 250 руб', $all);    // находит ВСЕ числа: $all[0] === ['5', '250']
+preg_replace('/\s+/', ' ', "много    пробелов\n\tтут");        // "много пробелов тут" — схлопнуть любые пробельные последовательности
+preg_split('/[\s,]+/', 'латте, эспрессо  чай');                  // разбить по запятой И/ИЛИ пробелам: ['латте', 'эспрессо', 'чай']
+
+// именованные группы — читаемее позиционных
+preg_match('/(?&lt;drink&gt;\w+)-(?&lt;size&gt;[SML])/', 'latte-L', $m);
+echo $m['drink'], ' ', $m['size'];        // "latte L"</code></pre>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Замените в примере 4.1 <code>mb_substr($name, 0, 2)</code> на <code>mb_substr($name, -2)</code>. Что вернёт отрицательный второй аргумент? Проверьте документацию, если не уверены, а не гадайте.</li><li>Напишите regex, проверяющий, что email содержит ровно один символ <code>@</code> и хотя бы одну точку после него. Протестируйте на трёх примерах: валидный, без <code>@</code>, с двумя <code>@</code>.</li></ul></div>
+
+<h2 id="sec-5"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-5"></label>5. Суперглобалы без фреймворка <a class="anchor" href="#sec-5">#</a></h2>
+
+<p>То, что <code>Illuminate\Http\Request</code> оборачивает в удобный объект (<code>$request-&gt;input('name')</code>, <code>$request-&gt;query('page')</code>) — на самом деле массивы, доступные из любой точки скрипта.</p>
+<table>
+<tr><th>Суперглобал</th><th>Содержит</th><th>Ловушка</th></tr>
+<tr><td><code>$_GET</code></td><td>query-параметры URL (<code>?a=1&amp;b=2</code>)</td><td>всегда строки, даже для чисел — <code>$_GET['page']</code> это <code>"2"</code>, не <code>2</code></td></tr>
+<tr><td><code>$_POST</code></td><td>тело формы <code>application/x-www-form-urlencoded</code> или <code>multipart/form-data</code></td><td>ПУСТ для JSON-тела запроса — для JSON нужен <code>file_get_contents('php://input')</code> + <code>json_decode</code></td></tr>
+<tr><td><code>$_SERVER</code></td><td>метаданные запроса: метод, URI, заголовки (<code>HTTP_*</code>), IP</td><td>ключи заголовков — <code>HTTP_X_CUSTOM_HEADER</code> для заголовка <code>X-Custom-Header</code> (дефисы → подчёркивания, всё капсом)</td></tr>
+<tr><td><code>$_SESSION</code></td><td>данные, привязанные к cookie сессии (после <code>session_start()</code>)</td><td>без <code>session_start()</code> — <code>Undefined variable $_SESSION</code> при первом обращении на запись</td></tr>
+<tr><td><code>$_COOKIE</code></td><td>куки, присланные браузером</td><td>только ЧТЕНИЕ — установка куки идёт через <code>setcookie()</code>, а не запись в <code>$_COOKIE</code></td></tr>
+<tr><td><code>$_ENV</code> / <code>getenv()</code></td><td>переменные окружения</td><td>наполняются по-разному в зависимости от <code>variables_order</code> в php.ini — раздел 12 сделает свой явный парсер .env</td></tr>
+</table>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+// GET-параметр с явным приведением типа и дефолтом — то, что делает Request::query() в Laravel
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+
+// JSON-тело запроса — суперглобалы тут бессильны
+$body = json_decode(file_get_contents('php://input'), associative: true) ?? [];
+$title = $body['title'] ?? null;
+
+// заголовок запроса
+$auth = $_SERVER['HTTP_AUTHORIZATION'] ?? null;                // для заголовка "Authorization"
+$method = $_SERVER['REQUEST_METHOD'];                            // GET, POST, PUT, DELETE...
+
+// метод переопределения через скрытое поле (браузерные формы не умеют PUT/DELETE напрямую)
+$method = $_POST['_method'] ?? $method;                          // тот же трюк, что делает Laravel с @method('PUT') в Blade</code></pre>
+<div class="why"><b>Зачем:</b> Каждый пример здесь — то, что Laravel <code>Request</code> объект оборачивает в один вызов метода. <code>$request-&gt;query('page', 1)</code> внутри делает ровно то же самое: проверку <code>isset</code>, приведение типа, дефолт. Метод-переопределение (<code>_method</code>) — то же решение, что <code>@method('PUT')</code> в Blade: HTML-формы физически не умеют отправлять PUT/DELETE, поэтому фреймворки эмулируют это скрытым полем и читают его на сервере.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Почему <code>$_GET['page']</code> нельзя сравнивать через <code>===</code> с числом напрямую (<code>$_GET['page'] === 2</code>)? Что нужно сделать перед сравнением?</li><li>Напишите функцию <code>function jsonBody(): array</code>, которая читает JSON-тело запроса и возвращает пустой массив при невалидном JSON вместо падения с ошибкой.</li></ul></div>
+
+<h2 id="sec-6"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-6"></label>6. Обработка ошибок: Exception vs Error, хендлеры <a class="anchor" href="#sec-6">#</a></h2>
+
+<h3>6.1 Иерархия Throwable</h3>
+<pre>Throwable (интерфейс — и Error, и Exception его реализуют; try/catch (Throwable $e) ловит ОБА)
+├── Error                              — ошибки уровня движка: то, что раньше "фатально останавливало" скрипт без возможности поймать
+│   ├── TypeError                       — несовпадение типа (сработает strict_types из раздела 2!)
+│   ├── ValueError                      — валидный тип, невалидное значение (напр. str_split('hello', 0))
+│   ├── ArgumentCountError               — не хватает обязательных аргументов
+│   └── DivisionByZeroError              — деление на ноль в intdiv() или через %
+└── Exception                          — ошибки уровня приложения: то, что ВЫ бросаете намеренно
+    ├── RuntimeException                 — ошибка, которую нельзя было предвидеть на этапе написания кода
+    ├── LogicException                    — ошибка программиста: неверный вызов API, нарушение контракта
+    │   ├── InvalidArgumentException
+    │   ├── DomainException
+    │   └── OutOfRangeException
+    └── ваши собственные: class PaymentFailed extends RuntimeException {}</pre>
+
+<p><b>Практическое правило:</b> <code>Error</code> — то, что почти всегда сигнализирует БАГ в вашем коде (опечатка в типе, обращение к несуществующему методу) — ловить его стоит только на самом верхнем уровне (global handler) для логирования, не для восстановления работы. <code>Exception</code> — то, что вы бросаете и ловите осознанно как часть бизнес-логики (недостаточно средств, неверный формат, товар закончился) — тот же принцип, что <code>Result&lt;T, E&gt;</code> в TS-лабе или доменные исключения в ООП-лабе.</p>
+
+<h3>6.2 try/catch/finally и порядок ловли</h3>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+function chargeCard(float $amount): string
+{
+    if ($amount &lt;= 0) throw new InvalidArgumentException('сумма должна быть положительной');
+    if ($amount &gt; 100000) throw new RuntimeException('превышен лимит');
+    return 'auth-' . bin2hex(random_bytes(4));
+}
+
+try {
+    echo chargeCard(-10);
+} catch (InvalidArgumentException $e) {                 // СПЕЦИФИЧНОЕ исключение — раньше, чем общее
+    echo 'Некорректный ввод: ' . $e-&gt;getMessage();
+} catch (RuntimeException $e) {                            // общее — позже
+    echo 'Ошибка выполнения: ' . $e-&gt;getMessage();
+} finally {
+    echo 'Логируем попытку оплаты в любом случае';        // выполнится ВСЕГДА — и при успехе, и при исключении, и даже при return внутри try
+}
+
+// ловля НЕСКОЛЬКИХ типов одним catch (PHP 8+)
+try { chargeCard(-5); }
+catch (InvalidArgumentException | RuntimeException $e) { echo $e-&gt;getMessage(); }</code></pre>
+
+<h3>6.3 Своё исключение с дополнительными данными</h3>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+final class InsufficientStockException extends RuntimeException
+{
+    public function __construct(
+        public readonly string $drinkName,
+        public readonly int $requested,
+        public readonly int $available,
+    ) {
+        parent::__construct("Недостаточно \"{$drinkName}\": запрошено {$requested}, доступно {$available}");
+    }
+}
+
+try {
+    throw new InsufficientStockException('Латте', 5, 2);
+} catch (InsufficientStockException $e) {
+    echo $e-&gt;getMessage();               // готовое сообщение из parent::__construct
+    echo $e-&gt;drinkName, $e-&gt;requested, $e-&gt;available;   // ПЛЮС структурированные данные для программной обработки (например, JSON-ответа API)
+}</code></pre>
+
+<h3>6.4 set_error_handler и set_exception_handler — последняя линия обороны</h3>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+set_error_handler(function (int $severity, string $message, string $file, int $line): bool {
+    // ловит E_WARNING, E_NOTICE и подобные "старые" ошибки (не Error/Exception!) — превращает их в исключение
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+
+set_exception_handler(function (Throwable $e): void {          // последний рубеж — если исключение долетело досюда, никто его не поймал
+    http_response_code(500);
+    error_log($e-&gt;getMessage() . ' в ' . $e-&gt;getFile() . ':' . $e-&gt;getLine());
+    echo json_encode(['error' =&gt; 'Внутренняя ошибка сервера']);   // пользователю — общее сообщение, НЕ детали (риск утечки данных)
+});
+
+// теперь даже "старая" ошибка становится исключением и ловится глобально:
+echo $undefinedVariable;    // Warning превращается в ErrorException → set_exception_handler → JSON-ответ 500</code></pre>
+<div class="why"><b>Зачем:</b> <code>set_error_handler</code> закрывает разрыв между старым стилем PHP-ошибок (warnings, notices — не Throwable, их нельзя поймать через try/catch) и современными исключениями: превращая их в <code>ErrorException</code>, вы получаете единую точку обработки. <code>set_exception_handler</code> — ровно то место, куда Laravel помещает свой <code>Handler::render()</code> из ООП-лабы и Laravel-лабы (раздел 4.3 Laravel-лабы, <code>withExceptions</code>) — просто без обёртки фреймворка, голыми руками.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите <code>finally</code> из примера 6.2 и добавьте <code>return</code> внутри блока <code>try</code> перед строкой с echo. Выполнится ли код после <code>return</code>? А если вернуть <code>finally</code> обратно?</li><li>Почему <code>set_exception_handler</code> отдаёт пользователю ОБЩЕЕ сообщение ("Внутренняя ошибка сервера"), а не <code>$e-&gt;getMessage()</code> напрямую? Приведите конкретный пример исключения, чьё сообщение было бы опасно показывать пользователю.</li></ul></div>
+
+<h2 id="sec-7"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-7"></label>7. Замыкания, callable, стрелочные функции <a class="anchor" href="#sec-7">#</a></h2>
+
+<h3>7.1 use — замыкание должно ЯВНО захватить переменную</h3>
+<p>В отличие от JS (JS-лаба, раздел 6 — любая внешняя переменная автоматически доступна внутри замыкания), в PHP анонимная функция <b>ничего не видит снаружи по умолчанию</b> — нужно явно перечислить, что захватить, через <code>use</code>.</p>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+$discountPercent = 10;
+
+$withDiscount = function (float $price) use ($discountPercent): float {   // явный захват — без use код бы не скомпилировался
+    return $price * (1 - $discountPercent / 100);
+};
+echo $withDiscount(250);           // 225
+
+// use ($var) — копия ЗНАЧЕНИЯ на момент СОЗДАНИЯ замыкания, не на момент вызова!
+$discountPercent = 50;
+echo $withDiscount(250);            // ВСЁ ЕЩЁ 225 — замыкание захватило 10%, изменение снаружи его не коснулось
+
+// use (&amp;$var) — захват ПО ССЫЛКЕ, видит последующие изменения
+$counter = 0;
+$increment = function () use (&amp;$counter): void { $counter++; };
+$increment(); $increment(); $increment();
+echo $counter;                       // 3</code></pre>
+<details class="deep"><summary>🔬 Под капотом: use по значению vs use по ссылке — прямая параллель с var-в-цикле из JS-лабы</summary><div class="deep-body">
+
+<p>Захват <code>use ($var)</code> в PHP делает КОПИЮ значения в момент, когда объявляется замыкание — это устраняет баг «var в цикле» из JS-лабы (раздел 1 JS-лабы) АВТОМАТИЧЕСКИ: <code>foreach ($items as $item) { $callbacks[] = function() use ($item) { echo $item; }; }</code> — каждое замыкание получает свою копию <code>$item</code> на момент создания, аналогично тому, как <code>let</code> в JS создаёт новую переменную на итерации. Проблема была бы, если бы использовали <code>use (&$item)</code> — тогда все замыкания делили бы одну ссылку, и результат совпал бы с багом <code>var</code> из JS-лабы.</p>
+</div></details>
+
+<h3>7.2 Стрелочные функции (fn) — автоматический захват</h3>
+<pre><code>$discountPercent = 10;
+$withDiscount = fn(float $price): float =&gt; $price * (1 - $discountPercent / 100);   // автоматически "видит" $discountPercent, БЕЗ use
+// но: только для ОДНОГО выражения, без {} и без нескольких строк — для сложной логики нужна обычная function</code></pre>
+
+<h3>7.3 callable: четыре формы одного типа</h3>
+<pre><code>function applyToAll(array $items, callable $fn): array { return array_map($fn, $items); }
+
+applyToAll([1, 2, 3], fn($x) =&gt; $x * 2);                   // 1. стрелочная функция
+applyToAll([1, 2, 3], function ($x) { return $x * 2; });    // 2. анонимная функция
+applyToAll([1, 2, 3], 'strval');                             // 3. строка с именем функции
+applyToAll($users, [$formatter, 'formatName']);              // 4. [объект, 'метод'] — вызов метода экземпляра
+applyToAll($users, [Formatter::class, 'formatStatic']);       // 4b. [класс, 'метод'] — статический метод
+applyToAll($users, $formatter-&gt;formatName(...));               // 5. first-class callable syntax (PHP 8.1) — как $obj.method(...) в TS-лабе</code></pre>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Перепишите пример со счётчиком (<code>$counter</code>) так, чтобы три вызова <code>$increment()</code> НЕ увеличивали общий <code>$counter</code>, а каждый раз начинали с нуля. Что нужно поменять — <code>use</code> или что-то ещё?</li><li>Почему first-class callable syntax <code>$formatter-&gt;formatName(...)</code> (форма 5) предпочтительнее формы <code>[$formatter, 'formatName']</code> (форма 4) в современном коде? Подсказка: что проверяет IDE и статический анализатор в каждом случае.</li></ul></div>
+
+<h2 id="sec-8"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-8"></label>8. Генераторы, Iterator, ленивые вычисления <a class="anchor" href="#sec-8">#</a></h2>
+
+<h3>8.1 yield — функция, которая приостанавливается и продолжается</h3>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+function readLargeFile(string $path): Generator {
+    $handle = fopen($path, 'r');
+    while (($line = fgets($handle)) !== false) {
+        yield trim($line);           // "выдать" строку и ПРИОСТАНОВИТЬСЯ — файл читается по одной строке, а не целиком в память
+    }
+    fclose($handle);
+}
+
+foreach (readLargeFile('orders.csv') as $line) {
+    echo $line, "\n";
+    if ($line === 'STOP') break;      // прекращаем читать файл в ЛЮБОЙ момент — оставшиеся гигабайты даже не тронуты
+}</code></pre>
+<p>Вызов <code>readLargeFile('orders.csv')</code> НЕ читает файл сразу — он возвращает объект <code>Generator</code> мгновенно; код внутри функции выполняется по одной итерации <code>foreach</code> за раз. На файле в 10 ГБ обычная функция, вернувшая бы массив всех строк, съела бы 10+ ГБ памяти; генератор — единицы килобайт, независимо от размера файла.</p>
+<h3>8.2 yield с ключами и yield from</h3>
+<pre><code>function keyedGenerator(): Generator {
+    yield 'first' =&gt; 1;
+    yield 'second' =&gt; 2;
+}
+foreach (keyedGenerator() as $key =&gt; $value) { echo "$key: $value\n"; }
+
+function combined(): Generator {
+    yield 1;
+    yield from [2, 3, 4];              // yield from делегирует другому итерируемому — массиву, Generator, Traversable
+    yield from anotherGenerator();
+    yield 5;
+}</code></pre>
+
+<h3>8.3 Iterator и IteratorAggregate — свой перебираемый объект</h3>
+<p>Прямая параллель <code>Symbol.iterator</code> из JS-лабы (раздел 8): интерфейс, который делает объект совместимым с <code>foreach</code>.</p>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+final class OrderCollection implements IteratorAggregate, Countable
+{
+    /** @var Order[] */
+    private array $orders = [];
+
+    public function add(Order $order): void { $this-&gt;orders[] = $order; }
+
+    public function getIterator(): Iterator { return new ArrayIterator($this-&gt;orders); }   // делегируем готовому итератору
+
+    public function count(): int { return count($this-&gt;orders); }                            // Countable — работает count($collection)
+}
+
+$collection = new OrderCollection();
+$collection-&gt;add(new Order('Латте', 250));
+$collection-&gt;add(new Order('Эспрессо', 150));
+
+foreach ($collection as $order) { echo $order-&gt;drinkName, "\n"; }     // работает благодаря IteratorAggregate
+echo count($collection);                                                  // работает благодаря Countable</code></pre>
+<div class="why"><b>Зачем:</b> <code>IteratorAggregate</code> проще в реализации, чем <code>Iterator</code> напрямую (не нужно вручную писать <code>current()/next()/key()/valid()/rewind()</code> — пять методов), если у вас уже есть готовая структура для делегирования (<code>ArrayIterator</code> оборачивает обычный массив). Реализовывать <code>Iterator</code> напрямую имеет смысл, когда логика перебора нетривиальна — например, генерация значений на лету без промежуточного массива (тогда обычно проще написать генератор с <code>yield</code>, как в 8.1, вместо ручной реализации интерфейса).</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Перепишите <code>readLargeFile</code> так, чтобы она пропускала пустые строки, не выдавая их через yield. Нужно ли это менять код вызывающей стороны (foreach)?</li><li>Реализуйте <code>OrderCollection implements Iterator</code> НАПРЯМУЮ (без делегирования на ArrayIterator) — пять обязательных методов. Сколько строк это заняло по сравнению с версией через IteratorAggregate?</li></ul></div>
+
+<h2 id="sec-9"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-9"></label>9. Магические методы: то, на чём стоит Laravel <a class="anchor" href="#sec-9">#</a></h2>
+
+<p>Каждый раз, когда в Laravel «просто работает» что-то похожее на магию — <code>$request-&gt;user</code> без метода <code>user()</code>, <code>Cache::get()</code> без объекта, <code>Model::where(...)</code> с несуществующим методом — под капотом один из методов ниже. Это раздел, после которого фасады и Eloquent перестают быть загадкой.</p>
+<table>
+<tr><th>Метод</th><th>Срабатывает когда</th><th>Где используется в Laravel</th></tr>
+<tr><td><code>__construct</code> / <code>__destruct</code></td><td>создание / уничтожение объекта</td><td>DI-контейнер вызывает __construct с резолвленными зависимостями (Laravel-лаба, раздел 5)</td></tr>
+<tr><td><code>__get($name)</code> / <code>__set($name, $value)</code></td><td>обращение к НЕСУЩЕСТВУЮЩЕМУ/недоступному свойству</td><td>Eloquent: <code>$model-&gt;title</code> — свойства title физически нет, __get достаёт из <code>$attributes</code></td></tr>
+<tr><td><code>__isset</code> / <code>__unset</code></td><td><code>isset($obj-&gt;x)</code> / <code>unset($obj-&gt;x)</code> для недоступного свойства</td><td>Eloquent: проверка наличия атрибута</td></tr>
+<tr><td><code>__call($name, $args)</code></td><td>вызов НЕСУЩЕСТВУЮЩЕГО метода экземпляра</td><td>Eloquent: <code>$query-&gt;whereStatus(...)</code> — динамические where-методы; делегирование в Builder</td></tr>
+<tr><td><code>__callStatic($name, $args)</code></td><td>вызов несуществующего СТАТИЧЕСКОГО метода</td><td><b>Фасады целиком!</b> <code>Cache::get()</code> — у фасада нет метода get(), __callStatic резолвит объект из контейнера и вызывает у НЕГО</td></tr>
+<tr><td><code>__invoke($args)</code></td><td>вызов объекта КАК функции: <code>$obj(...)</code></td><td>single-action контроллеры Laravel (<code>__invoke</code> вместо именованного метода)</td></tr>
+<tr><td><code>__toString()</code></td><td>приведение объекта к строке: <code>(string) $obj</code>, конкатенация, echo</td><td>Stringable-модели, вывод в Blade</td></tr>
+<tr><td><code>__clone()</code></td><td>после <code>clone $obj</code></td><td>сброс внутреннего состояния при копировании (например, id)</td></tr>
+</table>
+
+<h3>9.1 __get/__set: как Eloquent хранит атрибуты</h3>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+final class Model
+{
+    private array $attributes = [];
+
+    public function __get(string $name): mixed
+    {
+        return $this-&gt;attributes[$name] ?? null;             // ровно так $model-&gt;title достаёт данные из массива
+    }
+
+    public function __set(string $name, mixed $value): void
+    {
+        $this-&gt;attributes[$name] = $value;
+    }
+
+    public function __isset(string $name): bool { return isset($this-&gt;attributes[$name]); }
+}
+
+$drink = new Model();
+$drink-&gt;title = 'Латте';                 // на самом деле вызывается __set('title', 'Латте')
+echo $drink-&gt;title;                        // на самом деле вызывается __get('title')
+var_dump(isset($drink-&gt;title));             // на самом деле __isset('title')
+var_dump(isset($drink-&gt;missing));            // false — __isset для отсутствующего ключа</code></pre>
+
+<h3>9.2 __call и __callStatic: как работают фасады</h3>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+final class QueryBuilder
+{
+    private array $wheres = [];
+
+    public function where(string $column, mixed $value): static
+    {
+        $this-&gt;wheres[] = [$column, $value];
+        return $this;
+    }
+
+    public function __call(string $name, array $args): static     // ловит whereStatus(), whereTitle() — ЛЮБОЙ несуществующий метод
+    {
+        if (str_starts_with($name, 'where')) {
+            $column = lcfirst(substr($name, 5));                    // whereStatus → status
+            return $this-&gt;where($column, $args[0]);
+        }
+        throw new BadMethodCallException("метод {$name} не существует");
+    }
+}
+
+$query = new QueryBuilder();
+$query-&gt;whereStatus('open')-&gt;whereTitle('Латте');       // ни whereStatus, ни whereTitle физически не существуют как методы!
+
+// __callStatic — механизм ВСЕХ фасадов Laravel:
+final class Cache
+{
+    private static ?ArrayAccess $resolvedInstance = null;
+
+    public static function __callStatic(string $name, array $args): mixed
+    {
+        self::$resolvedInstance ??= app('cache');            // резолвим РЕАЛЬНЫЙ объект из контейнера один раз
+        return self::$resolvedInstance-&gt;$name(...$args);        // и вызываем у него настоящий метод
+    }
+}
+Cache::get('key');       // Cache::get физически не существует — это __callStatic → $resolvedInstance-&gt;get('key')</code></pre>
+<div class="why"><b>Зачем:</b> Это буквально то, что происходит внутри <code>Illuminate\Support\Facades\Facade</code> — упрощено до сути. <code>getFacadeAccessor()</code> у реального фасада возвращает строку типа <code>'cache'</code>, которую <code>app()</code> резолвит из контейнера (Laravel-лаба, раздел 5), а <code>__callStatic</code> перенаправляет вызов на реальный объект. Теперь, увидев <code>Cache::remember(...)</code>, вы знаете: это не «специальная синтаксическая конструкция», это ровно тот код, что вы только что написали, только в вендоре.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Реализуйте <code>__unset</code> для класса <code>Model</code> из 9.1, удаляющий ключ из <code>$attributes</code>. Проверьте через <code>unset($drink-&gt;title)</code>.</li><li>Что произойдёт при вызове <code>$query-&gt;whereStatus()</code> БЕЗ аргумента (<code>$args[0]</code> не существует)? Как защититься?</li></ul></div>
+
+<h2 id="sec-10"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-10"></label>10. match, null-safe, null coalescing <a class="anchor" href="#sec-10">#</a></h2>
+
+<h3>10.1 match vs switch</h3>
+<pre><code>$status = 'open';
+
+// switch: без break — "проваливается" в следующий case (частый источник багов); сравнение НЕСТРОГОЕ (==)
+switch ($status) {
+    case 'open': $label = 'Открыт'; break;
+    case 'closed': $label = 'Закрыт'; break;
+    default: $label = 'Неизвестно';
+}
+
+// match: строгое сравнение (===), НЕТ проваливания, возвращает значение, обязателен default (или UnhandledMatchError)
+$label = match ($status) {
+    'open' =&gt; 'Открыт',
+    'closed', 'archived' =&gt; 'Закрыт',        // несколько условий через запятую — ОДНА стрелка
+    default =&gt; 'Неизвестно',
+};
+
+// match БЕЗ аргумента — цепочка условий (замена длинному if/elseif)
+$discount = match (true) {
+    $total &gt; 1000 =&gt; 0.15,
+    $total &gt; 500 =&gt; 0.10,
+    default =&gt; 0,
+};
+
+// UnhandledMatchError — если убрать default и статус не совпадёт ни с одним вариантом
+$label = match ($status) {
+    'open' =&gt; 'Открыт',
+};                                            // 'closed' → UnhandledMatchError: Unhandled match case 'closed'</code></pre>
+
+<h3>10.2 Nullsafe оператор ?-> и null coalescing ??/??=</h3>
+<pre><code>$city = $order?-&gt;customer?-&gt;address?-&gt;city;      // если ЛЮБОЕ звено цепочки null — весь результат null, БЕЗ фатальной ошибки
+// эквивалент ДО PHP 8:
+$city = null;
+if ($order !== null &amp;&amp; $order-&gt;customer !== null &amp;&amp; $order-&gt;customer-&gt;address !== null) {
+    $city = $order-&gt;customer-&gt;address-&gt;city;
+}
+
+$name = $data['name'] ?? 'Гость';                  // если ключа нет ИЛИ значение null — взять дефолт (не бросает Notice)
+$config['timeout'] ??= 30;                            // присвоить, ТОЛЬКО ЕСЛИ ещё не установлено (null coalescing assignment)</code></pre>
+<details class="deep"><summary>🔬 Под капотом: ?-> останавливается на ПЕРВОМ null, а не проверяет все звенья</summary><div class="deep-body">
+
+<p><code>$order?-&gt;customer?-&gt;address?-&gt;city</code> — если <code>$order</code> уже <code>null</code>, движок даже не пытается обратиться к <code>-&gt;customer</code>: вся цепочка справа от первого <code>null</code>-звена просто не вычисляется (short-circuit), возвращается <code>null</code> целиком. Это отличается от гипотетического «проверить все поля на null и потом собрать» — вычисление останавливается на первом же провале, как <code>&amp;&amp;</code> в булевых выражениях.</p>
+</div></details>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Перепишите <code>match (true) { $total &gt; 1000 =&gt; ..., $total &gt; 500 =&gt; ... }</code> через обычный <code>if/elseif</code>. Какая версия читается понятнее при добавлении четвёртого условия?</li><li>Что вернёт <code>$order?-&gt;customer-&gt;address</code> (обратите внимание: только ПЕРВЫЙ <code>?-&gt;</code>, второй — обычный <code>-&gt;</code>), если <code>$order</code> равен <code>null</code>? А если <code>$order</code> не null, но <code>$order-&gt;customer</code> — null?</li></ul></div>
+
+<h2 id="sec-11"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-11"></label>11. Composer и PSR-4 автозагрузка руками <a class="anchor" href="#sec-11">#</a></h2>
+
+<h3>11.1 Проблема, которую решает автозагрузка</h3>
+<pre><code>&lt;?php
+// ДО автозагрузки — руками:
+require __DIR__ . '/src/Domain/Drink.php';
+require __DIR__ . '/src/Domain/Order.php';
+require __DIR__ . '/src/Domain/OrderLine.php';
+require __DIR__ . '/src/Http/Router.php';
+// ...и так далее для каждого файла, в правильном порядке зависимостей, руками, при каждом новом классе</code></pre>
+
+<h3>11.2 composer.json и PSR-4</h3>
+<pre><code>{
+    "name": "vanilla/coffee-shop",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}</code></pre>
+<p>PSR-4 — соглашение: namespace <code>App\Domain\Drink</code> соответствует файлу <code>src/Domain/Drink.php</code> (префикс <code>App\</code> отброшен, остаток namespace — путь к папке, имя класса — имя файла). Composer генерирует автозагрузчик, который при первом обращении к неизвестному классу вычисляет путь по этому правилу и делает <code>require</code> сам.</p><pre><code>composer dump-autoload            # сгенерировать/обновить vendor/autoload.php</code></pre>
+
+<h3>11.3 spl_autoload_register — как это устроено внутри</h3>
+<pre><code>&lt;?php
+declare(strict_types=1);
+
+spl_autoload_register(function (string $class): void {
+    $prefix = 'App';
+    if (!str_starts_with($class, $prefix)) return;                 // не наш namespace — пусть пробует следующий зарегистрированный autoloader
+
+    $relative = substr($class, strlen($prefix) + 1);                 // App\Domain\Drink → Domain\Drink (+1 — пропускаем сам разделитель \)
+    $path = __DIR__ . '/src/' . str_replace('\\', '/', $relative) . '.php';   // Domain\Drink → Domain/Drink.php
+
+    if (file_exists($path)) require $path;
+});
+
+// теперь:
+$drink = new App\Domain\Drink('Латте', 250);      // класс НИКОГДА не был require'нут явно — autoloader нашёл файл сам, ПРИ ПЕРВОМ обращении</code></pre>
+<div class="why"><b>Зачем:</b> <code>spl_autoload_register</code> — единственный низкоуровневый механизм, на котором построена ЛЮБАЯ автозагрузка в PHP, включая ту, что генерирует Composer. Функция вызывается движком в момент, когда встречается имя класса, для которого ещё нет объявления, — и делает ровно то же самое, что вы только что написали руками: вычисляет путь по правилу и подключает файл. Composer добавляет к этому оптимизации (classmap для продакшена — таблица класс→файл, построенная заранее, без вычисления пути на каждый запрос) и поддержку нескольких правил одновременно (PSR-4, PSR-0, classmap, files).</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Что произойдёт, если зарегистрировать ДВА автозагрузчика через <code>spl_autoload_register</code> дважды подряд с разными namespace-префиксами? В каком порядке они будут проверяться?</li><li>Composer в продакшен-режиме (<code>composer install --optimize-autoloader</code>) строит classmap вместо вычисления пути на лету. Почему это быстрее и в чём цена (что нужно делать при добавлении нового класса)?</li></ul></div>
+
+<h2 id="sec-12"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-12"></label>12. Стек, структура проекта, поток запроса практики <a class="anchor" href="#sec-12">#</a></h2>
+
+<table>
+<tr><th>Компонент</th><th>Выбор</th><th>Зачем</th></tr>
+<tr><td>Язык</td><td>PHP 8.4 CLI</td><td>без фреймворка — только язык и стандартная библиотека</td></tr>
+<tr><td>Веб-сервер (dev)</td><td>встроенный <code>php -S localhost:8000</code></td><td>без Apache/nginx — держим «vanilla» до конца; в проде так не делают, но для лабы честно и просто</td></tr>
+<tr><td>БД</td><td>PostgreSQL 17 через голый PDO</td><td>тот же принцип, что в остальных лабах; ORM нарочно отсутствует — сессия 7</td></tr>
+<tr><td>Автозагрузка</td><td>Composer, только PSR-4</td><td>единственная внешняя зависимость до конца лабы (кроме pdo_pgsql — расширение PHP, не composer-пакет)</td></tr>
+<tr><td>Тесты</td><td>PHPUnit (сессия 8, минимально)</td><td>для финальной проверки REST API</td></tr>
+</table>
+<pre>php-lab/
+├── docker-compose.yml         app (php:8.4-cli, php -S) · postgres
+├── composer.json               PSR-4: App\ → src/
+├── public/index.php             единственная точка входа: создаёт роутер+контейнер, диспетчеризует запрос
+├── src/
+│   ├── Domain/                   Drink, Order, OrderLine, Money — та же бизнес-логика, что в ООП-лабе, переписанная с нуля
+│   ├── Http/
+│   │   ├── Router.php             свой мини-роутер (сессия 5)
+│   │   ├── Request.php             тонкая обёртка над суперглобалами
+│   │   ├── Response.php            JSON-ответы, коды статуса
+│   │   └── Middleware/             CorsMiddleware, JsonBodyMiddleware, ErrorHandlingMiddleware
+│   ├── Container/
+│   │   └── Container.php           свой DI-контейнер с autowiring через Reflection (сессия 6)
+│   ├── Persistence/
+│   │   └── PdoConnection.php        обёртка над PDO: prepared statements, транзакции (сессия 7)
+│   ├── Support/
+│   │   ├── Env.php                   свой .env парсер (сессия 7)
+│   │   └── Csrf.php                   генерация/проверка CSRF-токена (сессия 7)
+│   └── Controllers/                MenuController, OrderController
+├── database/schema.sql           таблицы drinks, orders, order_lines
+└── tests/                          PHPUnit (сессия 8)</pre>
+<pre>HTTP-запрос → php -S встроенный сервер → public/index.php
+  │
+  ▼  $container = new Container(); $container-&gt;bind(...)         ← сессия 6
+  ▼  $router = new Router();  require 'routes.php';               ← сессия 5, регистрирует маршруты
+  ▼  $router-&gt;dispatch($request)
+  │     → находит маршрут → $container-&gt;make(MenuController::class)   ← autowiring: конструктор резолвится САМ
+  │     → middleware-цепочка (auth? json-body? error-handling?)        ← сессия 8
+  ▼  $controller-&gt;index($request)
+  │     → PdoConnection-&gt;query(...)                                     ← сессия 7, prepared statement
+  ▼  Response::json([...])</pre>
+<div class="next-box"><span class="tag">ПЕРЕД РАЗДЕЛОМ <a href="#sec-13">13</a></span><ul>
+<li>📖 Держать открытым: <a href="https://www.php.net/manual/ru/language.oop5.magic.php" target="_blank">PHP: Magic Methods</a>, <a href="https://www.php-fig.org/psr/psr-4/" target="_blank">PSR-4</a>.</li>
+<li>✅ Docker; composer установлен локально ИЛИ используется через контейнер.</li>
+</ul></div>
+
+<h2 id="sec-13"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-13"></label>13. Задания: восемь сессий <a class="anchor" href="#sec-13">#</a></h2>
+
+<p>Порядок строгий: сессии 1-4 — язык в изоляции (CLI-скрипты, без веб-сервера), сессии 5-7 — инфраструктура своими руками (роутер, DI, PDO), сессия 8 — всё вместе в REST API + сравнение с Laravel. Ответы «проверь себя» — в <span class="file">docs/php-notes.md</span>.</p>
+<table>
+<tr><th>Сессия</th><th>Тема</th><th>Результат</th></tr>
+<tr><td>1</td><td>Стенд, типы, strict_types, == vs ===</td><td>таблица PHP 7 vs PHP 8 сравнений воспроизведена вживую</td></tr>
+<tr><td>2</td><td>Массивы (copy-on-write) и строки</td><td>доказан момент физического копирования; mb_* против strlen на кириллице</td></tr>
+<tr><td>3</td><td>Суперглобалы и обработка ошибок</td><td>свой JSON-запрос без фреймворка; глобальный exception handler</td></tr>
+<tr><td>4</td><td>Замыкания, генераторы, магия, современный синтаксис</td><td>свой мини-фасад через __callStatic; генератор для больших данных</td></tr>
+<tr><td>5</td><td>Composer + свой роутер</td><td>PSR-4 автозагрузка + маршрутизация с параметрами пути</td></tr>
+<tr><td>6</td><td>Свой DI-контейнер</td><td>autowiring через Reflection — то, что видели как потребители в Laravel-лабе</td></tr>
+<tr><td>7</td><td>PDO, сессии, CSRF, .env</td><td>prepared statements, транзакция, свой CSRF-токен, свой .env-парсер</td></tr>
+<tr><td>8</td><td>Финал: REST API + сравнение с Laravel</td><td>рабочий API на кофейне, middleware-цепочка, таблица «что Laravel даёт бесплатно»</td></tr>
+</table>
+<div class="session-banner" id="session-1">Сессия <a href="#session-1" style="color:#fff;text-decoration:none">1</a> — Стенд, типы, strict_types, == vs === <span>~2 часа</span></div>
+<div class="step" id="step-1-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-1"></label><span class="num">Шаг 1.1</span>Стенд: Docker, PHP 8.4, PostgreSQL<a class="anchor" href="#step-1-1">#</a></span><div class="step-body">
+<pre><code>mkdir php-lab &amp;&amp; cd php-lab &amp;&amp; git init
+mkdir -p src public database tests docs</code></pre>
+<pre><code># docker-compose.yml
+services:
+  app:
+    image: php:8.4-cli
+    working_dir: /app
+    volumes: [.:/app]
+    command: sh -c "docker-php-ext-install pdo_pgsql &gt;/dev/null 2&gt;&amp;1; sleep infinity"
+    ports: ["8000:8000"]
+    depends_on: [postgres]
+
+  postgres:
+    image: postgres:17
+    environment: { POSTGRES_DB: coffee, POSTGRES_USER: coffee, POSTGRES_PASSWORD: coffee }
+    ports: ["5432:5432"]</code></pre>
+<pre><code>docker compose up -d
+docker compose exec app php -v            # PHP 8.4.x
+docker compose exec app php -m | grep pdo   # pdo_pgsql должен быть в списке</code></pre>
+<div class="why"><b>Зачем:</b> Один контейнер <code>app</code> для всего — язык, будущий веб-сервер, будущий Composer; расширение <code>pdo_pgsql</code> ставится сразу, хотя понадобится только в сессии 7, чтобы не прерываться на пересборку образа позже.</div>
+</div></div>
+<div class="step" id="step-1-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-1-2"></label><span class="num">Шаг 1.2</span>strict_types и таблица == живьём: PHP 8 отличается от PHP 7<a class="anchor" href="#step-1-2">#</a></span><div class="step-body">
+<p>Воспроизводим таблицу сравнений из раздела 2 — не веря на слово, а видя вывод <code>var_dump</code> и включённые/выключенные <code>strict_types</code>.</p><pre><code>&lt;?php
+// src/01_types.php — БЕЗ strict_types, намеренно
+declare(strict_types=0);         // явно слабая типизация, для контраста со следующим файлом
+
+function addQty(int $a, int $b): int { return $a + $b; }
+
+var_dump(addQty('2', 3));         // 5 (int) — строка "2" тихо приведена к числу, БЕЗ strict_types это работает
+
+echo "=== таблица == (проверьте, что видите в PHP 8.4) ===\n";
+var_dump(0 == 'abc');       // false в PHP 8 (в PHP 7 было true!)
+var_dump(0 == '');           // false в PHP 8
+var_dump(0 == '0');          // true — валидная числовая строка
+var_dump('1' == '01');       // true — обе валидные числовые строки
+var_dump('10' == '1e1');     // true — экспоненциальная запись
+var_dump(null == 0);          // true — null приводится к 0
+var_dump(null == false);       // true
+var_dump([] == false);          // true
+
+echo "=== явное приведение ===\n";
+var_dump((int) '42abc');        // 42
+var_dump((int) 3.9);              // 3, не 4 — ОТБРАСЫВАЕТ дробную часть
+var_dump((bool) '0.0');            // true — единственная НЕ "0" строка, но выглядит как ноль
+var_dump((bool) '0');               // false</code></pre>
+<pre><code>&lt;?php
+// src/02_types_strict.php — С strict_types
+declare(strict_types=1);
+
+function addQtyStrict(int $a, int $b): int { return $a + $b; }
+
+try {
+    addQtyStrict('2', 3);           // TypeError — строка НЕ приводится автоматически
+} catch (TypeError $e) {
+    echo "Поймано: {$e-&gt;getMessage()}\n";
+}
+addQtyStrict(2, 3);                    // 5 — ok, оба уже int</code></pre>
+<pre><code>docker compose exec app php src/01_types.php
+docker compose exec app php src/02_types_strict.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>int(5)
+=== таблица == (проверьте, что видите в PHP 8.4) ===
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+=== явное приведение ===
+int(42)
+int(3)
+bool(true)
+bool(false)
+
+Поймано: addQtyStrict(): Argument #1 ($a) must be of type int, string given, called in ...</pre></div>
+<div class="why"><b>Зачем:</b> Первый файл без <code>strict_types</code> тихо принимает <code>'2'</code> как <code>int</code> — удобно, но означает, что опечатка (передали строку вместо числа) не будет замечена интерпретатором никогда, только в рантайме, если разница в поведении вообще проявится. Второй файл с <code>strict_types=1</code> ловит это немедленно как <code>TypeError</code> — тот же принцип «строгость ловит ошибки на границе», что <code>strict</code> в TS-лабе и <code>preventLazyLoading</code> в Laravel-лабе.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите <code>declare(strict_types=1)</code> из второго файла и запустите снова. Изменится ли поведение <code>addQtyStrict('2', 3)</code>?</li><li>Создайте третий файл БЕЗ <code>declare</code> вообще (ни 0, ни 1) и вызовите оттуда функцию <code>addQtyStrict</code>, объявленную в файле СО strict_types. Какое поведение победит — вызывающего файла или объявляющего? Вспомните правило из раздела 2.1.</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 1 → ПЕРЕД СЕССИЕЙ 2</span><ul>
+<li>✅ <code>git add -A && git commit -m "session 1: stand and types"</code></li>
+<li>📝 Ответы 1.1–1.2 в <span class="file">docs/php-notes.md</span>.</li>
+<li>📖 Почитать: <a href="https://www.php.net/manual/ru/language.references.php" target="_blank">PHP: References Explained</a> — сессия 2 целиком про массивы и copy-on-write.</li>
+</ul></div>
+<div class="session-banner" id="session-2">Сессия <a href="#session-2" style="color:#fff;text-decoration:none">2</a> — Массивы (copy-on-write) и строки <span>~2,5 часа</span></div>
+<div class="step" id="step-2-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-1"></label><span class="num">Шаг 2.1</span>Copy-on-write вживую: измеряем момент физического копирования<a class="anchor" href="#step-2-1">#</a></span><div class="step-body">
+<p>Copy-on-write — не абстракция, а измеримый момент времени. Используем <code>memory_get_usage()</code>, чтобы увидеть его своими глазами.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/03_cow.php
+
+function mb(): string { return number_format(memory_get_usage() / 1024, 1) . ' KB'; }
+
+echo "до создания массива: " . mb() . "\n";
+$a = range(1, 500000);                          // большой массив — 500 тысяч элементов
+echo "после создания \$a: " . mb() . "\n";
+
+$b = $a;                                          // "копия" — но memory_get_usage НЕ должен вырасти заметно!
+echo "после \$b = \$a (ДО изменения): " . mb() . "\n";
+
+$b[0] = 'изменено';                                // ВОТ ЗДЕСЬ происходит физическое копирование — copy-on-write сработал
+echo "после \$b[0] = ... (ПОСЛЕ изменения): " . mb() . "\n";
+
+var_dump($a[0]);            // 1 — оригинал НЕ пострадал
+var_dump($b[0]);             // "изменено"</code></pre>
+<pre><code>docker compose exec app php src/03_cow.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>до создания массива: 0.4 KB
+после создания $a: ~18000 KB
+после $b = $a (ДО изменения): ~18000 KB          ← НЕ выросло! $b пока указывает на ту же структуру, что $a
+после $b[0] = ... (ПОСЛЕ изменения): ~36000 KB    ← ВЫРОСЛО ровно в момент первой записи — физическая копия создана ИМЕННО СЕЙЧАС</pre></div>
+<div class="why"><b>Зачем:</b> Строка «после <code>$b = $a</code>» с почти неизменным потреблением памяти — прямое доказательство того, что присваивание массива НЕ копирует память сразу. Скачок происходит ровно на строке <code>$b[0] = ...</code> — движок видит, что на внутреннюю структуру ссылаются два имени переменных (refcount 2), и создаёт независимую копию именно в момент попытки изменить одну из них. Если бы вы никогда не трогали <code>$b</code>, копия никогда бы не была создана — экономия, невозможная в языках с обычным «всегда копировать при присваивании».</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Замените <code>$b = $a</code> на <code>$b = &$a</code> (явная ссылка). Изменится ли поведение памяти при <code>$b[0] = ...</code>? Изменится ли значение <code>$a[0]</code> теперь?</li><li>Передайте <code>$a</code> в функцию, которая ничего не меняет, только читает (<code>function readOnly(array $arr) { return count($arr); }</code>). Вырастет ли память? Почему это ожидаемо, зная механизм COW?</li></ul></div>
+</div></div>
+<div class="step" id="step-2-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-2"></label><span class="num">Шаг 2.2</span>array_filter сохраняет ключи, usort мутирует и сбрасывает — на данных кофейни<a class="anchor" href="#step-2-2">#</a></span><div class="step-body">
+<p>Функции массивов на данных кофейни — с явным вниманием к сохранению/сбросу ключей, которое путает почти всех новичков.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/04_arrays.php
+
+$drinks = [
+    ['name' =&gt; 'Эспрессо', 'price' =&gt; 150, 'category' =&gt; 'coffee'],
+    ['name' =&gt; 'Латте', 'price' =&gt; 250, 'category' =&gt; 'coffee'],
+    ['name' =&gt; 'Капучино', 'price' =&gt; 230, 'category' =&gt; 'coffee'],
+    ['name' =&gt; 'Чай', 'price' =&gt; 120, 'category' =&gt; 'tea'],
+];
+
+// array_column — вытащить один столбец, опционально с ключом
+$names = array_column($drinks, 'name');
+$priceByName = array_column($drinks, 'price', 'name');
+print_r($names);
+print_r($priceByName);
+
+// array_filter СОХРАНЯЕТ ключи — классическая ловушка
+$coffeeOnly = array_filter($drinks, fn($d) =&gt; $d['category'] === 'coffee');
+var_dump(array_keys($coffeeOnly));           // [0, 1, 2] — чай был под ключом 3, он удалён, но 0,1,2 остались КАК БЫЛИ
+$coffeeOnlyReindexed = array_values($coffeeOnly);   // ТЕПЕРЬ [0, 1, 2] заново — array_values сбрасывает ключи
+
+// usort МУТИРУЕТ и СБРАСЫВАЕТ ключи (в отличие от array_filter)
+$sorted = $drinks;                              // копия перед сортировкой (COW!) — не трогаем оригинал
+usort($sorted, fn($a, $b) =&gt; $a['price'] &lt;=&gt; $b['price']);
+echo $sorted[0]['name'], "\n";                    // Чай — 120, самый дешёвый
+
+// array_reduce — сумма и группировка одновременно через массив-аккумулятор
+$totals = array_reduce($drinks, function (array $carry, array $d): array {
+    $carry['sum'] = ($carry['sum'] ?? 0) + $d['price'];
+    $carry['byCategory'][$d['category']][] = $d['name'];
+    return $carry;
+}, []);
+print_r($totals);</code></pre>
+<pre><code>docker compose exec app php src/04_arrays.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>Array ( [0] => Эспрессо [1] => Латте [2] => Капучино [3] => Чай )
+Array ( [Эспрессо] => 150 [Латте] => 250 [Капучино] => 230 [Чай] => 120 )
+array(3) { [0]=> int(0) [1]=> int(1) [2]=> int(2) }
+Чай
+Array ( [sum] => 750 [byCategory] => Array ( [coffee] => Array (...) [tea] => Array ( [0] => Чай ) ) )</pre></div>
+<div class="why"><b>Зачем:</b> <code>array_filter</code> сохраняет исходные ключи намеренно — это позволяет потом сопоставить отфильтрованные элементы с оригинальным массивом по тому же ключу, если понадобится. Но при выводе в JSON (сессия 8!) массив с «дырками» в числовых ключах (<code>[0=&gt;.., 1=&gt;.., 3=&gt;..]</code> без 2) сериализуется как ОБЪЕКТ <code>{"0":..,"1":..,"3":..}</code>, а не массив <code>[...]</code> — классический источник багов на границе с фронтендом, если забыть <code>array_values()</code> перед <code>json_encode</code>.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Закомментируйте <code>$sorted = $drinks;</code> (копию перед сортировкой) и вызовите <code>usort($drinks, ...)</code> напрямую на оригинале. Проверьте <code>$drinks[0]</code> после — изменился ли порядок в переменной, которую вы, возможно, не планировали трогать?</li><li>Пропустите <code>array_values()</code> перед <code>json_encode($coffeeOnly)</code>. Запустите <code>var_dump(json_encode($coffeeOnly))</code> и сравните с <code>json_encode($coffeeOnlyReindexed)</code>. В чём разница в структуре JSON?</li></ul></div>
+</div></div>
+<div class="step" id="step-2-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-3"></label><span class="num">Шаг 2.3</span>mb_* vs обычные строковые функции на кириллице; sprintf; именованные regex-группы<a class="anchor" href="#step-2-3">#</a></span><div class="step-body">
+<p>mb_* против обычных строковых функций — не абстрактно, а на реальном названии напитка с кириллицей.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/05_strings.php
+
+$name = 'Латте маккиато';
+
+echo "strlen: " . strlen($name) . "\n";                 // байты — большое число из-за UTF-8
+echo "mb_strlen: " . mb_strlen($name) . "\n";             // символы — правильное количество
+
+echo "substr(0,5): [" . substr($name, 0, 5) . "]\n";       // обрежет байты ПОСЕРЕДИНЕ символа — мусор
+echo "mb_substr(0,5): [" . mb_substr($name, 0, 5) . "]\n";   // "Латте" — корректно
+
+echo "strtoupper: " . strtoupper($name) . "\n";              // кириллица останется КАК ЕСТЬ, не работает без mb_
+echo "mb_strtoupper: " . mb_strtoupper($name) . "\n";          // "ЛАТТЕ МАККИАТО"
+
+// sprintf для форматированного чека
+$price = 275.5;
+$qty = 2;
+echo sprintf("%-20s x%d = %8.2f ₽\n", $name, $qty, $price * $qty);
+
+// preg_match для валидации простого формата "название-размер"
+$sku = 'latte-L';
+if (preg_match('/^(?&lt;drink&gt;[a-z]+)-(?&lt;size&gt;[SML])$/', $sku, $m)) {
+    echo "Напиток: {$m['drink']}, размер: {$m['size']}\n";
+} else {
+    echo "Неверный формат SKU\n";
+}</code></pre>
+<pre><code>docker compose exec app php src/05_strings.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>strlen: 27
+mb_strlen: 14
+substr(0,5): [ÐÐ°Ñ]
+mb_substr(0,5): [Латте]
+strtoupper: Латте маккиато
+mb_strtoupper: ЛАТТЕ МАККИАТО
+Латте маккиато x2 =   551.00 ₽
+Напиток: latte, размер: L</pre></div>
+<div class="why"><b>Зачем:</b> Разница <code>strlen</code> (27 байт) и <code>mb_strlen</code> (14 символов) — прямое следствие того, что каждая кириллическая буква в UTF-8 занимает 2 байта, а пробел и латиница — 1. <code>substr</code>, работая с байтами вслепую, режет ровно посередине двухбайтового символа, получая нечитаемый мусор — это не «баг PHP», а следствие того, что вы дали байтовой функции задачу, требующую понимания кодировки. <code>strtoupper</code> без <code>mb_</code> преобразует только ASCII-буквы (A-Z), кириллицу игнорирует молча — без единой ошибки, просто не сработает, что часто остаётся незамеченным до продакшена с реальными пользовательскими данными. Заодно и <code>sprintf("%-20s", ...)</code> здесь не добавил ни одного пробела — имя напитка уже занимает 27 байт, больше заданной ширины в 20, а <code>%s</code> в sprintf, как и всё остальное здесь, меряет байты, а не символы.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Замените в SKU-примере строку на <code>'Latte-L'</code> (заглавная L в начале). Сработает ли regex? Почему — что означает диапазон <code>[a-z]</code> без модификатора <code>i</code>?</li><li>Напишите функцию <code>truncate(string $text, int $maxChars): string</code>, обрезающую текст до <code>$maxChars</code> символов (не байт!) с добавлением «…» если текст был длиннее. Используйте только mb_* функции.</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 2 → ПЕРЕД СЕССИЕЙ 3</span><ul>
+<li>✅ <code>git commit -am "session 2: arrays and strings"</code></li>
+<li>📝 Ответы 2.1–2.3.</li>
+<li>📖 Почитать: <a href="https://www.php.net/manual/ru/language.exceptions.php" target="_blank">PHP: Exceptions</a> — сессия 3 целиком про обработку ошибок.</li>
+</ul></div>
+<div class="session-banner" id="session-3">Сессия <a href="#session-3" style="color:#fff;text-decoration:none">3</a> — Суперглобалы и обработка ошибок <span>~2,5 часа</span></div>
+<div class="step" id="step-3-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-1"></label><span class="num">Шаг 3.1</span>Предскажи → проверь: $_GET и приведение типов на границе с HTTP<a class="anchor" href="#step-3-1">#</a></span><div class="step-body">
+<p>Прежде чем писать код — предскажите: что вернёт <code>$_GET['page']</code>, если в URL нет параметра <code>page</code> вообще? А если <code>?page=</code> (пустое значение)? А если <code>?page=abc</code>? Запишите три ответа, потом проверьте на встроенном сервере.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// public/probe.php — временный файл для сессии, удалим в конце
+
+header('Content-Type: application/json; charset=utf-8');
+
+$raw = $_GET['page'] ?? '(ключа нет)';
+$asInt = isset($_GET['page']) ? (int) $_GET['page'] : null;
+
+echo json_encode([
+    'raw'    =&gt; $raw,
+    'asInt'  =&gt; $asInt,
+    'method' =&gt; $_SERVER['REQUEST_METHOD'],
+    'uri'    =&gt; $_SERVER['REQUEST_URI'],
+], JSON_UNESCAPED_UNICODE);</code></pre>
+<pre><code>docker compose exec -d app php -S 0.0.0.0:8000 -t public
+curl -s "localhost:8000/probe.php"                | jq          # без page вообще
+curl -s "localhost:8000/probe.php?page="           | jq          # пустое значение
+curl -s "localhost:8000/probe.php?page=abc"         | jq          # нечисловая строка
+curl -s "localhost:8000/probe.php?page=3"            | jq          # нормальный случай</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>{"raw": "(ключа нет)", "asInt": null, ...}
+{"raw": "", "asInt": 0, ...}                    ← isset("") это TRUE (ключ ЕСТЬ, просто пустая строка) — (int)"" это 0
+{"raw": "abc", "asInt": 0, ...}                  ← (int)"abc" это 0, БЕЗ ошибки — PHP берёт числовой префикс, которого тут нет
+{"raw": "3", "asInt": 3, ...}</pre></div>
+<div class="why"><b>Зачем:</b> Сверьте с вашим предсказанием: если оно не совпало на строке <code>page=</code> или <code>page=abc</code> — это нормально, и именно ради этого расхождения стоило сначала угадать, а не сразу смотреть ответ. <code>isset($_GET['page'])</code> проверяет НАЛИЧИЕ ключа, а не «непустоту» значения — пустая строка это валидное значение, ключ есть. <code>(int) 'abc'</code> — не ошибка и не <code>NaN</code>-подобное значение (в PHP такого нет для int), а тихий <code>0</code>, потому что строка не начинается с цифры.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Предскажите: что вернёт <code>(int) $_GET['page']</code>, если <code>page=3abc</code> (число с буквами ПОСЛЕ)? Проверьте.</li><li>Напишите условие, которое отличает «page не передан» от «page передан как пустая строка» — используя ТОЛЬКО <code>isset</code> и сравнение, без <code>??</code>.</li></ul></div>
+</div></div>
+<div class="step" id="step-3-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-2"></label><span class="num">Шаг 3.2</span>JSON-тело запроса: php://input + защита от валидного-но-не-массива JSON<a class="anchor" href="#step-3-2">#</a></span><div class="step-body">
+<p>JSON-тело запроса — суперглобалы бессильны, нужен <code>php://input</code>. Пишем маленькую функцию, которая станет частью будущего Request-объекта (сессия 5).</p><pre><code>&lt;?php
+declare(strict_types=1);
+// public/echo-json.php
+
+header('Content-Type: application/json; charset=utf-8');
+
+function jsonBody(): array
+{
+    $raw = file_get_contents('php://input');
+    if ($raw === '' || $raw === false) return [];
+    $decoded = json_decode($raw, associative: true);
+    return is_array($decoded) ? $decoded : [];      // защита от валидного JSON, который не объект/массив (например, просто число "5")
+}
+
+$body = jsonBody();
+echo json_encode(['received' =&gt; $body, 'title' =&gt; $body['title'] ?? null], JSON_UNESCAPED_UNICODE);</code></pre>
+<p>Предскажите: что произойдёт, если отправить НЕвалидный JSON (например, <code>{title:</code> с незакрытой скобкой)? Функция упадёт с ошибкой, вернёт <code>null</code>, или тихо вернёт пустой массив?</p><pre><code>curl -s -X POST localhost:8000/echo-json.php -H 'Content-Type: application/json' -d '{"title":"Латте","qty":2}' | jq
+curl -s -X POST localhost:8000/echo-json.php -H 'Content-Type: application/json' -d '{title: broken' | jq       # невалидный JSON
+curl -s -X POST localhost:8000/echo-json.php -H 'Content-Type: application/json' -d '42' | jq                    # валидный JSON, но не объект</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>{"received":{"title":"Латте","qty":2},"title":"Латте"}
+{"received":[],"title":null}
+{"received":[],"title":null}</pre></div>
+<div class="why"><b>Зачем:</b> И невалидный JSON, и валидный-но-не-объект JSON дают одинаковый результат — пустой массив — потому что функция явно проверяет <code>is_array($decoded)</code> после декодирования. Без этой проверки третий случай (<code>42</code>) вернул бы <code>int</code>, и следующая строка <code>$body['title']</code> бросила бы <code>TypeError: Cannot access offset of type string on int</code> — то, что случилось бы, если бы вы поверили «раз это JSON, значит, будет массив».</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите проверку <code>is_array($decoded)</code> и отправьте тело <code>42</code> ещё раз. Прочитайте ТОЧНОЕ сообщение об ошибке — на какой именно строке она возникает?</li><li>Добавьте в <code>jsonBody()</code> параметр <code>?json_error</code>: используйте <code>json_last_error()</code>, чтобы отличить «пустое тело» от «синтаксически неверный JSON» — сейчас оба случая неразличимы снаружи функции.</li></ul></div>
+</div></div>
+<div class="step" id="step-3-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-3"></label><span class="num">Шаг 3.3</span>Предскажи порядок finally vs exception handler, потом проверь<a class="anchor" href="#step-3-3">#</a></span><div class="step-body">
+<p>Глобальный exception handler — предскажите порядок вывода ПЕРЕД запуском: что попадёт в HTTP-ответ, что — в лог сервера, и в каком порядке выполнится <code>finally</code> относительно них.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// public/errors.php
+
+final class InsufficientStockException extends RuntimeException
+{
+    public function __construct(public readonly string $drink, public readonly int $available)
+    {
+        parent::__construct("Недостаточно \"{$drink}\": доступно {$available}");
+    }
+}
+
+set_exception_handler(function (Throwable $e): void {
+    http_response_code($e instanceof InsufficientStockException ? 409 : 500);
+    error_log('[EXCEPTION] ' . $e-&gt;getMessage());                      // видно в docker compose logs, НЕ в ответе клиенту
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'error' =&gt; $e instanceof InsufficientStockException ? $e-&gt;getMessage() : 'Внутренняя ошибка сервера',   // детали ТОЛЬКО для ожидаемых исключений
+    ], JSON_UNESCAPED_UNICODE);
+});
+
+function reserveStock(string $drink, int $requested, int $available): void
+{
+    if ($requested &gt; $available) {
+        throw new InsufficientStockException($drink, $available);
+    }
+    echo json_encode(['reserved' =&gt; $requested]);
+}
+
+$drink = $_GET['drink'] ?? 'Латте';
+$requested = (int) ($_GET['qty'] ?? 1);
+
+try {
+    reserveStock($drink, $requested, available: 3);
+} finally {
+    error_log('[FINALLY] попытка резервирования обработана');            // выполнится ВСЕГДА — до того, как исключение долетит до handler'а!
+}</code></pre>
+<pre><code>curl -s -w '\n%{http_code}' "localhost:8000/errors.php?qty=2"          # достаточно — успех
+curl -s -w '\n%{http_code}' "localhost:8000/errors.php?qty=10"          # недостаточно — 409, наше исключение
+docker compose logs app --tail 5                                            # проверьте порядок FINALLY vs EXCEPTION</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>{"reserved":2}
+200
+{"error":"Недостаточно \"Латте\": доступно 3"}
+409
+
+# в логах — именно в этом порядке:
+[FINALLY] попытка резервирования обработана
+[EXCEPTION] Недостаточно "Латте": доступно 3</pre></div>
+<div class="why"><b>Зачем:</b> <code>finally</code> выполняется, даже когда исключение НЕ поймано локальным <code>catch</code> — блок try/finally без catch означает «сделай это в любом случае, а исключение пусть летит дальше». Поэтому лог <code>[FINALLY]</code> оказывается ПЕРЕД <code>[EXCEPTION]</code> — исключение продолжает «падать» вверх по стеку вызовов, пока не долетит до <code>set_exception_handler</code>, и только там обрабатывается окончательно. Разделение сообщений (детали в <code>error_log</code>, общая фраза в JSON-ответе для непредвиденных ошибок) — намеренное: <code>InsufficientStockException</code> достаточно безопасно показать клиенту (это бизнес-логика, не секрет), а гипотетическая ошибка БД с данными подключения — нет.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Смените <code>available: 3</code> на несуществующий параметр (например, вызовите <code>reserveStock($drink, $requested)</code> без третьего аргумента). Какое исключение поймает handler теперь и какой код придёт клиенту — 409 или 500?</li><li>Уберите <code>set_exception_handler</code> целиком. Что вернёт curl теперь при <code>qty=10</code> — валидный JSON с ошибкой, HTML-страницу PHP по умолчанию, или пустой ответ? Проверьте и объясните разницу с наличием handler'а.</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 3 → ПЕРЕД СЕССИЕЙ 4</span><ul>
+<li>✅ <code>git commit -am "session 3: superglobals and errors"</code>; удалите временные public/probe.php, echo-json.php ИЛИ оставьте — они не мешают.</li>
+<li>📝 Ответы 3.1–3.3.</li>
+<li>📖 Почитать: <a href="https://www.php.net/manual/ru/language.oop5.magic.php" target="_blank">PHP: Magic Methods</a> — сессия 4 покажет их на своём мини-фасаде.</li>
+</ul></div>
+<div class="session-banner" id="session-4">Сессия <a href="#session-4" style="color:#fff;text-decoration:none">4</a> — Замыкания, генераторы, магия, современный синтаксис <span>~3 часа</span></div>
+<div class="step" id="step-4-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-1"></label><span class="num">Шаг 4.1</span>Прочитать код и предсказать вывод: use по значению защищает от JS-бага<a class="anchor" href="#step-4-1">#</a></span><div class="step-body">
+<p>Сначала — сломанный код с намеренной ошибкой в замыкании. Найдите баг ЧТЕНИЕМ, прежде чем запускать.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/06_closures_broken.php — НАЙДИТЕ БАГ, не запуская
+
+function makeDiscountCalculators(array $percentages): array
+{
+    $calculators = [];
+    foreach ($percentages as $label =&gt; $percent) {
+        $calculators[$label] = function (float $price) use ($percent) {
+            return $price * (1 - $percent / 100);
+        };
+    }
+    return $calculators;
+}
+
+$calcs = makeDiscountCalculators(['small' =&gt; 5, 'medium' =&gt; 10, 'big' =&gt; 20]);
+echo $calcs['small'](1000), "\n";     // предскажите: сколько?
+echo $calcs['big'](1000), "\n";        // предскажите: сколько?</code></pre>
+<p>Предскажите оба значения. Это НЕ баг с var-в-цикле из JS-лабы (здесь <code>foreach</code>, а не <code>for</code> с внешним <code>var</code>, и <code>use ($percent)</code> захватывает по значению) — код на самом деле корректен. Запустите и сверьтесь.</p><pre><code>docker compose exec app php src/06_closures_broken.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>950
+800</pre><p>Если вы предсказали правильно — отлично, значит, разница между <code>use ($var)</code> (копия при создании) и вариантом с <code>use (&$var)</code> уже усвоена. Если предсказали одинаковое значение для обоих — вернитесь к разделу 7.1 и разберите ещё раз, почему <code>use</code> по значению защищает от бага, характерного для JS-циклов с <code>var</code>.</p></div>
+<div class="why"><b>Зачем:</b> Этот пример работает правильно РОВНО ПОТОМУ, что <code>use ($percent)</code> копирует значение <code>$percent</code> в момент создания каждого замыкания внутри <code>foreach</code> — каждая итерация цикла создаёт СВОЁ замыкание со СВОЕЙ копией. Замените <code>use ($percent)</code> на <code>use (&$percent)</code> — и получите баг, аналогичный <code>var</code> в JS: все три замыкания начнут делить одну переменную <code>$percent</code>, и после цикла её значение будет равно последнему элементу массива (20) для всех трёх ключей.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Замените <code>use ($percent)</code> на <code>use (&$percent)</code>, запустите — воспроизведите баг предсказанием и подтверждением. Оба вызова теперь должны вернуть ОДИНАКОВОЕ значение — какое именно и почему?</li></ul></div>
+</div></div>
+<div class="step" id="step-4-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-2"></label><span class="num">Шаг 4.2</span>Генератор vs жадное чтение: предсказать разницу в памяти, потом измерить<a class="anchor" href="#step-4-2">#</a></span><div class="step-body">
+<p>Генератор для больших данных — не абстрактный «файл в 10 ГБ», а измеримая разница в памяти на CSV с заказами.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/07_generators.php
+
+function generateOrdersCsv(string $path, int $rows): void
+{
+    $handle = fopen($path, 'w');
+    fputcsv($handle, ['id', 'drink', 'qty', 'price']);
+    $drinks = ['Эспрессо', 'Латте', 'Капучино', 'Чай'];
+    for ($i = 1; $i &lt;= $rows; $i++) {
+        fputcsv($handle, [$i, $drinks[$i % 4], random_int(1, 3), random_int(120, 300)]);
+    }
+    fclose($handle);
+}
+
+function readOrdersEager(string $path): array                  // ЖАДНО: весь файл в память сразу
+{
+    $rows = array_map('str_getcsv', file($path));
+    array_shift($rows);                                            // убрать заголовок
+    return $rows;
+}
+
+function readOrdersLazy(string $path): Generator                // ЛЕНИВО: по одной строке за раз
+{
+    $handle = fopen($path, 'r');
+    fgetcsv($handle);                                               // пропустить заголовок
+    while (($row = fgetcsv($handle)) !== false) {
+        yield $row;
+    }
+    fclose($handle);
+}
+
+generateOrdersCsv('/tmp/orders.csv', 200000);
+
+function mb(): string { return number_format(memory_get_peak_usage() / 1024 / 1024, 1) . ' MB'; }
+
+$sumEager = 0;
+foreach (readOrdersEager('/tmp/orders.csv') as $row) { $sumEager += (int) $row[3]; }
+echo "eager: сумма={$sumEager}, пик памяти=" . mb() . "\n";</code></pre>
+<p>Предскажите: во сколько раз пик памяти для <code>readOrdersLazy</code> будет меньше, чем для <code>readOrdersEager</code>, на 200 000 строк — примерно в 2 раза? В 10? В 100? Запишите догадку, затем допишите второй замер и проверьте.</p><pre><code>// добавить в конец файла:
+$sumLazy = 0;
+foreach (readOrdersLazy('/tmp/orders.csv') as $row) { $sumLazy += (int) $row[3]; }
+echo "lazy: сумма={$sumLazy}, пик памяти=" . mb() . "\n";     // ВНИМАНИЕ: memory_get_peak_usage — это МАКСИМУМ за весь скрипт,
+                                                                    // включая eager-версию выше; для честного сравнения запустите lazy В ОТДЕЛЬНОМ файле</code></pre>
+<pre><code>docker compose exec app php src/07_generators.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>eager: сумма=38025680 (пример), пик памяти=48.3 MB</pre><p>Для честного измерения lazy-версии создайте ОТДЕЛЬНЫЙ файл <code>07b_generators_lazy.php</code> с той же функцией <code>readOrdersLazy</code> и вызовом — только тогда <code>memory_get_peak_usage()</code> покажет пик именно ленивого чтения, не смешанный с eager-версией из того же процесса.</p></div>
+<div class="why"><b>Зачем:</b> Разница на 200 000 строк — это разница между «держать весь массив строк в памяти одновременно» и «держать одну строку за раз плюс небольшой буфер файлового дескриптора». На файле в несколько гигабайт eager-версия либо съест всю доступную память, либо упрётся в <code>memory_limit</code> из <code>php.ini</code> и упадёт с фатальной ошибкой; lazy-версия обработает файл ЛЮБОГО размера с постоянным потреблением памяти.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Создайте отдельный файл только с lazy-версией и сравните её пиковую память с eager. Во сколько раз меньше оказалось на самом деле — совпало с вашей исходной догадкой?</li><li>Добавьте в <code>readOrdersLazy</code> досрочный выход: остановите чтение после первых 100 строк через <code>break</code> во внешнем <code>foreach</code>. Успеет ли генератор прочитать весь файл до конца, или остановится именно на 100-й строке? Как это проверить?</li></ul></div>
+</div></div>
+<div class="step" id="step-4-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-3"></label><span class="num">Шаг 4.3</span>Собрать свой фасад по шагам: __callStatic, предсказание перед каждым вызовом<a class="anchor" href="#step-4-3">#</a></span><div class="step-body">
+<p>Свой мини-фасад через <code>__callStatic</code> — не просто скопировать пример из раздела 9, а собрать его по кусочкам с проверкой на каждом шаге.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/08_facade.php — шаг 1: реальный класс, который будем прятать за фасадом
+
+final class Logger
+{
+    private array $lines = [];
+    public function info(string $message): void { $this-&gt;lines[] = "[INFO] {$message}"; }
+    public function error(string $message): void { $this-&gt;lines[] = "[ERROR] {$message}"; }
+    public function dump(): void { echo implode("\n", $this-&gt;lines), "\n"; }
+}</code></pre>
+<p>Шаг 2 — ПРЕЖДЕ чем писать фасад, предскажите: что произойдёт, если вызвать <code>Log::info('тест')</code> без единой строчки фасада, полагаясь только на класс выше? Проверьте — должна быть <code>Error: Class "Log" not found</code>. Теперь пишем фасад.</p><pre><code>&lt;?php
+// продолжение src/08_facade.php — шаг 2: фасад
+
+final class Log
+{
+    private static ?Logger $instance = null;
+
+    public static function __callStatic(string $name, array $args): mixed
+    {
+        self::$instance ??= new Logger();                    // резолвим (создаём) реальный объект ОДИН раз, лениво
+        if (!method_exists(self::$instance, $name)) {
+            throw new BadMethodCallException("Logger не имеет метода {$name}");
+        }
+        return self::$instance-&gt;$name(...$args);               // делегируем вызов
+    }
+}
+
+Log::info('Заказ #1 создан');
+Log::error('Не хватает Латте');
+Log::info('Заказ #2 создан');
+Log::dump();                                                     // предскажите: сработает ли, ведь dump() не принимает аргументов и ничего не возвращает?</code></pre>
+<pre><code>docker compose exec app php src/08_facade.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>[INFO] Заказ #1 создан
+[ERROR] Не хватает Латте
+[INFO] Заказ #2 создан</pre></div>
+<div class="why"><b>Зачем:</b> <code>Log::dump()</code> сработал, хотя <code>dump</code> не принимает аргументов и ничего не возвращает, — потому что <code>__callStatic</code> не делает никаких предположений о сигнатуре метода, он просто передаёт вызов дальше через <code>...$args</code> (пустой массив в данном случае) и возвращает результат (<code>null</code>, который никто не читает). Это ТОЧНО то же поведение, что у реальных фасадов Laravel: <code>Cache::forget('key')</code> работает так же, как <code>Cache::remember('key', 60, fn() =&gt; ...)</code> — фасад не знает и не должен знать конкретные сигнатуры, он универсален по построению.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Вызовите <code>Log::warning('тест')</code> — метода <code>warning</code> в <code>Logger</code> нет. Какое именно исключение и с каким сообщением вы получите? Совпадает ли оно с вашим предсказанием, основанным на коде <code>__callStatic</code>?</li><li>Добавьте в <code>Logger</code> метод <code>warning</code>. Нужно ли менять хоть одну строку в классе <code>Log</code> (фасаде), чтобы <code>Log::warning(...)</code> заработал? Что это говорит о том, что фасад ФИЗИЧЕСКИ не перечисляет методы?</li></ul></div>
+</div></div>
+<div class="step" id="step-4-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-4-4"></label><span class="num">Шаг 4.4</span>match + nullsafe на цепочке Order→Customer→Address с неполными данными<a class="anchor" href="#step-4-4">#</a></span><div class="step-body">
+<p>match, nullsafe, coalescing — на цепочке данных заказа, где часть полей может отсутствовать.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/09_modern_syntax.php
+
+final class Address { public function __construct(public readonly string $city) {} }
+final class Customer { public function __construct(public readonly string $name, public readonly ?Address $address = null) {} }
+final class Order { public function __construct(public readonly int $total, public readonly ?Customer $customer = null) {} }
+
+$orders = [
+    new Order(1500, new Customer('Анна', new Address('Москва'))),
+    new Order(300, new Customer('Борис')),           // без адреса!
+    new Order(2000),                                     // без клиента вообще!
+];
+
+foreach ($orders as $order) {
+    $city = $order-&gt;customer?-&gt;address?-&gt;city ?? 'город не указан';       // ПРЕДСКАЖИТЕ вывод для каждого из трёх заказов
+    $tier = match (true) {
+        $order-&gt;total &gt;= 1000 =&gt; 'gold',
+        $order-&gt;total &gt;= 500 =&gt; 'silver',
+        default =&gt; 'bronze',
+    };
+    echo "Заказ на {$order-&gt;total}₽, город: {$city}, уровень: {$tier}\n";
+}</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>Заказ на 1500₽, город: Москва, уровень: gold
+Заказ на 300₽, город: город не указан, уровень: bronze
+Заказ на 2000₽, город: город не указан, уровень: gold</pre></div>
+<div class="why"><b>Зачем:</b> Второй и третий заказы дают одинаковый результат по городу («город не указан»), хотя провалы РАЗНЫЕ: у второго заказа есть <code>customer</code>, но нет <code>address</code>; у третьего нет даже <code>customer</code>. Цепочка <code>?-&gt;customer?-&gt;address?-&gt;city</code> останавливается на ПЕРВОМ <code>null</code>-звене независимо от того, где оно встретилось, — это и есть short-circuit, разобранный в разделе 10.2.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Добавьте четвёртый заказ с total ровно 1000. Какой tier он получит согласно порядку условий в match(true)? Что было бы, если бы условия шли в обратном порядке (сначала &gt;= 500, потом &gt;= 1000)?</li><li>Замените <code>match (true)</code> на попытку через обычный <code>match ($order-&gt;total)</code> без <code>true</code>. Почему это не сработает для диапазонов значений — что именно сравнивает match без аргумента true?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 4 → ПЕРЕД СЕССИЕЙ 5</span><ul>
+<li>✅ <code>git commit -am "session 4: closures, generators, magic, modern syntax"</code>. Это конец «языка в изоляции» — дальше инфраструктура своими руками.</li>
+<li>📝 Ответы 4.1–4.4.</li>
+<li>📖 Почитать: <a href="https://www.php-fig.org/psr/psr-4/" target="_blank">PSR-4</a>, <a href="https://getcomposer.org/doc/01-basic-usage.md" target="_blank">Composer: Basic usage</a>.</li>
+</ul></div>
+<div class="session-banner" id="session-5">Сессия <a href="#session-5" style="color:#fff;text-decoration:none">5</a> — Composer + свой роутер <span>~3 часа</span></div>
+<div class="step" id="step-5-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-5-1"></label><span class="num">Шаг 5.1</span>Composer PSR-4: сначала без автозагрузки (сломано), потом с ней<a class="anchor" href="#step-5-1">#</a></span><div class="step-body">
+<p>Composer только для автозагрузки — переносим домен кофейни (Money, Drink, Order из принципов ООП-лабы) в src/ с PSR-4, БЕЗ единого <code>require</code>.</p><pre><code>docker compose exec app sh -c "curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer"
+docker compose exec app composer --version</code></pre>
+<pre><code>// composer.json
+{
+    "name": "vanilla/coffee-shop",
+    "require": {},
+    "autoload": { "psr-4": { "App\\": "src/" } }
+}</code></pre>
+<pre><code>&lt;?php
+declare(strict_types=1);
+// src/Domain/Money.php
+
+namespace App\Domain;
+
+final readonly class Money
+{
+    private function __construct(public int $cents) {}
+
+    public static function rub(int $rubles): self { return new self($rubles * 100); }
+    public static function fromCents(int $cents): self
+    {
+        if ($cents &lt; 0) throw new \InvalidArgumentException('Money не может быть отрицательным');
+        return new self($cents);
+    }
+
+    public function add(Money $other): self { return new self($this-&gt;cents + $other-&gt;cents); }
+    public function multiply(int $factor): self { return self::fromCents($this-&gt;cents * $factor); }
+    public function format(): string { return number_format($this-&gt;cents / 100, 2, ',', ' ') . ' ₽'; }
+}</code></pre>
+<pre><code>&lt;?php
+declare(strict_types=1);
+// src/Domain/Drink.php
+
+namespace App\Domain;
+
+final readonly class Drink
+{
+    public function __construct(public string $name, public Money $price) {}
+}</code></pre>
+<p>ПРЕЖДЕ чем запускать <code>composer dump-autoload</code>, предскажите: если сейчас написать <code>require 'src/Domain/Money.php'; new App\Domain\Money(...)</code> напрямую (без Composer вообще) — сработает ли? А если попробовать <code>new App\Domain\Drink(...)</code> без require для Drink.php, но с require для Money.php?</p><pre><code>&lt;?php
+// src/10_no_autoload.php — БЕЗ composer autoload, намеренно
+declare(strict_types=1);
+
+require __DIR__ . '/Domain/Money.php';
+
+$price = \App\Domain\Money::rub(250);
+echo $price-&gt;format(), "\n";                 // сработает — Money.php был require'нут
+
+try {
+    $drink = new \App\Domain\Drink('Латте', $price);   // Drink.php НЕ require'нут
+} catch (\Error $e) {
+    echo "Ошибка: {$e-&gt;getMessage()}\n";                  // Class "App\Domain\Drink" not found
+}</code></pre>
+<pre><code>docker compose exec app php src/10_no_autoload.php
+docker compose exec app composer dump-autoload</code></pre>
+<pre><code>&lt;?php
+// src/11_with_autoload.php — ТЕПЕРЬ с автозагрузкой
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';         // ЕДИНСТВЕННЫЙ require во всём проекте
+
+$drink = new \App\Domain\Drink('Латте', \App\Domain\Money::rub(250));    // Drink.php НИКОГДА явно не require'ился
+echo "{$drink-&gt;name}: {$drink-&gt;price-&gt;format()}\n";</code></pre>
+<pre><code>docker compose exec app php src/11_with_autoload.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre># без autoload:
+250,00 ₽
+Ошибка: Class "App\Domain\Drink" not found
+
+# с autoload:
+Латте: 250,00 ₽</pre></div>
+<div class="why"><b>Зачем:</b> Разница между двумя файлами — ровно один <code>require</code> вместо потенциально десятков. <code>vendor/autoload.php</code>, сгенерированный Composer, регистрирует функцию через <code>spl_autoload_register</code> (раздел 11.3) — ту же, что вы могли бы написать руками; просто Composer генерирует её автоматически из <code>composer.json</code> и поддерживает дополнительные оптимизации (classmap для продакшена).</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Создайте <code>src/Domain/Order.php</code> с классом <code>App\Domain\Order</code> — ни разу не запускайте <code>composer dump-autoload</code> заново. Заработает ли <code>new \App\Domain\Order(...)</code> в новом скрипте без пересборки автозагрузчика? (Подсказка: PSR-4 вычисляет путь по правилу на лету, не по заранее сохранённому списку файлов — в отличие от classmap.)</li></ul></div>
+</div></div>
+<div class="step" id="step-5-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-5-2"></label><span class="num">Шаг 5.2</span>Роутер v1 (наивный, ломается на параметрах) → v2 (regex-параметры)<a class="anchor" href="#step-5-2">#</a></span><div class="step-body">
+<p>Роутер строим по нарастающей: версия 1 — только точное совпадение пути (сломается на параметрах), версия 2 — с параметрами через regex.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/Http/Router.php — ВЕРСИЯ 1: наивная, только точные пути
+
+namespace App\Http;
+
+final class Router
+{
+    private array $routes = [];         // ['GET /menu' =&gt; callable]
+
+    public function get(string $path, callable $handler): void { $this-&gt;routes["GET {$path}"] = $handler; }
+    public function post(string $path, callable $handler): void { $this-&gt;routes["POST {$path}"] = $handler; }
+
+    public function dispatch(string $method, string $path): mixed
+    {
+        $key = "{$method} {$path}";
+        if (!isset($this-&gt;routes[$key])) {
+            http_response_code(404);
+            return ['error' =&gt; 'Not Found'];
+        }
+        return ($this-&gt;routes[$key])();
+    }
+}</code></pre>
+<p>Предскажите: что произойдёт при запросе <code>/orders/5</code>, если зарегистрирован маршрут <code>/orders/{id}</code>? Запустите и убедитесь, что версия 1 не умеет параметры — это ОЖИДАЕМЫЙ провал, не баг.</p><pre><code>&lt;?php
+// public/index.php — временный, для проверки версии 1
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';
+
+$router = new \App\Http\Router();
+$router-&gt;get('/orders/{id}', fn() =&gt; ['order' =&gt; 'найден бы, если б работало']);
+
+echo json_encode($router-&gt;dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']));</code></pre>
+<pre><code>docker compose exec -d app php -S 0.0.0.0:8000 -t public
+curl -s localhost:8000/orders/5      # предсказание vs реальность</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>{"error":"Not Found"}</pre><p>Как и предсказано (если предсказали верно) — версия 1 сравнивает путь СИМВОЛ В СИМВОЛ, а <code>/orders/{id}</code> буквально означает путь со ФИГУРНЫМИ СКОБКАМИ в URL, не «параметр». Нужна версия 2.</p></div>
+<pre><code>&lt;?php
+declare(strict_types=1);
+// src/Http/Router.php — ВЕРСИЯ 2: с параметрами через regex, ПОЛНОСТЬЮ переписан
+
+namespace App\Http;
+
+final class Router
+{
+    private array $routes = [];      // [['method'=&gt;.., 'pattern'=&gt;Regex, 'paramNames'=&gt;[...], 'handler'=&gt;callable]]
+
+    public function get(string $path, callable $handler): void  { $this-&gt;add('GET', $path, $handler); }
+    public function post(string $path, callable $handler): void { $this-&gt;add('POST', $path, $handler); }
+
+    private function add(string $method, string $path, callable $handler): void
+    {
+        $paramNames = [];
+        $pattern = preg_replace_callback('#\{(\w+)\}#', function ($m) use (&amp;$paramNames) {
+            $paramNames[] = $m[1];
+            return '([^/]+)';                                     // {id} → захватывающая группа "всё, кроме /"
+        }, $path);
+        $this-&gt;routes[] = ['method' =&gt; $method, 'pattern' =&gt; '#^' . $pattern . '$#', 'paramNames' =&gt; $paramNames, 'handler' =&gt; $handler];
+    }
+
+    public function dispatch(string $method, string $uri): mixed
+    {
+        $path = parse_url($uri, PHP_URL_PATH) ?? '/';               // отбросить query-строку (?a=1) — она не часть пути
+        foreach ($this-&gt;routes as $route) {
+            if ($route['method'] !== $method) continue;
+            if (preg_match($route['pattern'], $path, $matches)) {
+                $params = array_combine($route['paramNames'], array_slice($matches, 1));   // array_column-подобная сборка ключ=&gt;значение
+                return ($route['handler'])($params);
+            }
+        }
+        http_response_code(404);
+        return ['error' =&gt; 'Not Found'];
+    }
+}</code></pre>
+<pre><code>curl -s localhost:8000/orders/5              # теперь предскажите ЗАНОВО, с версией 2
+curl -s "localhost:8000/orders/5?debug=1"     # а с query-строкой?</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>{"order":"найден бы, если б работало"}
+{"order":"найден бы, если б работало"}</pre><p>Оба случая работают — включая с query-строкой, потому что <code>parse_url(..., PHP_URL_PATH)</code> явно отбрасывает всё после <code>?</code> перед сопоставлением с regex.</p></div>
+<div class="why"><b>Зачем:</b> Версия 1 провалилась не потому, что «регулярка забыта случайно» — а потому что путь-с-фигурными-скобками и путь-с-параметром это РАЗНЫЕ ПОНЯТИЯ, которые версия 1 не различала вообще (для неё любой путь — просто строка для точного сравнения). Версия 2 решает это, превращая часть пути в regex-паттерн с именованным списком параметров, собираемых через <code>array_combine</code> — тот же принцип, что <code>route(path, handler)</code> в собственном роутере из JS-лабы (сессия 8 JS-лабы), только на PHP-regex вместо JS-regex.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Добавьте маршрут с ДВУМЯ параметрами: <code>/workspaces/{workspaceId}/orders/{orderId}</code>. Проверьте, что оба параметра корректно попадают в массив <code>$params</code> с правильными именами.</li><li>Что произойдёт, если зарегистрировать ДВА маршрута, оба подходящие под один и тот же путь (например, <code>/orders/{id}</code> и <code>/orders/new</code>, а запрошен <code>/orders/new</code>)? Какой из них выиграет и почему — связано ли это с порядком регистрации?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 5 → ПЕРЕД СЕССИЕЙ 6</span><ul>
+<li>✅ <code>git commit -am "session 5: composer psr-4, own router"</code></li>
+<li>📝 Ответы 5.1–5.2.</li>
+<li>📖 Почитать: <a href="https://www.php.net/manual/ru/book.reflection.php" target="_blank">PHP: Reflection</a> — сессия 6 целиком на нём.</li>
+</ul></div>
+<div class="session-banner" id="session-6">Сессия <a href="#session-6" style="color:#fff;text-decoration:none">6</a> — Свой DI-контейнер: то, что видели как потребители в Laravel-лабе <span>~3,5 часа</span></div>
+<div class="step" id="step-6-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-6-1"></label><span class="num">Шаг 6.1</span>Боль без контейнера: ручное связывание трёх зависимых сервисов<a class="anchor" href="#step-6-1">#</a></span><div class="step-body">
+<p>Сначала — боль без контейнера. Три сервиса с зависимостями, собираемые руками, вложенно.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/Domain/Repositories.php — три сервиса с зависимостями друг от друга
+
+namespace App\Domain;
+
+interface OrderRepository { public function save(array $order): void; }
+
+final class InMemoryOrderRepository implements OrderRepository
+{
+    private array $orders = [];
+    public function save(array $order): void { $this-&gt;orders[] = $order; }
+}
+
+final class OrderLogger
+{
+    public function __construct(private OrderRepository $repo) {}
+    public function log(array $order): void { $this-&gt;repo-&gt;save($order); echo "залогировано\n"; }
+}
+
+final class OrderService
+{
+    public function __construct(private OrderLogger $logger, private OrderRepository $repo) {}
+    public function create(array $order): void { $this-&gt;repo-&gt;save($order); $this-&gt;logger-&gt;log($order); }
+}</code></pre>
+<pre><code>&lt;?php
+// src/12_manual_wiring.php — БЕЗ контейнера, руками
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';
+
+use App\Domain\{InMemoryOrderRepository, OrderLogger, OrderService};
+
+// чтобы создать OrderService, нужно СНАЧАЛА создать его зависимости, В ПРАВИЛЬНОМ порядке, руками:
+$repo = new InMemoryOrderRepository();          // 1. без зависимостей — можно первым
+$logger = new OrderLogger($repo);                // 2. зависит от repo
+$service = new OrderService($logger, $repo);      // 3. зависит от logger И repo — repo нужен ДВАЖДЫ, и это должен быть ТОТ ЖЕ экземпляр
+
+$service-&gt;create(['drink' =&gt; 'Латте', 'qty' =&gt; 2]);</code></pre>
+<p>Предскажите: что произойдёт, если по ошибке создать ДВА разных экземпляра <code>InMemoryOrderRepository</code> — один для <code>$logger</code>, другой для <code>$service</code>? Изменится ли видимое поведение <code>create()</code> в этом простом примере? А если бы <code>InMemoryOrderRepository</code> вёл счётчик заказов, который нужно было бы читать в обоих местах?</p><div class="why"><b>Зачем:</b> Ручное связывание работает на трёх классах — но каждый новый сервис добавляет ещё один уровень вложенности, и при 20 классах порядок создания (сначала то, что ни от чего не зависит, потом то, что зависит от уже созданного) превращается в отдельную головную боль, а гарантия «это ДОЛЖЕН быть тот же экземпляр repo» держится только на внимательности программиста, не на языке.</div>
+</div></div>
+<div class="step" id="step-6-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-6-2"></label><span class="num">Шаг 6.2</span>Контейнер v1: явные фабрики + singleton, но граф зависимостей всё ещё пишете руками<a class="anchor" href="#step-6-2">#</a></span><div class="step-body">
+<p>Версия 1 контейнера — просто хранилище фабрик (service locator), БЕЗ автоматического разрешения зависимостей. Работает, но требует явно описать каждый сервис.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/Container/Container.php — ВЕРСИЯ 1: только явные фабрики
+
+namespace App\Container;
+
+final class Container
+{
+    private array $bindings = [];    // имя =&gt; callable
+    private array $instances = [];    // имя =&gt; готовый объект (для singleton)
+
+    public function bind(string $name, callable $factory): void { $this-&gt;bindings[$name] = $factory; }
+
+    public function singleton(string $name, callable $factory): void
+    {
+        $this-&gt;bind($name, function () use ($name, $factory) {
+            return $this-&gt;instances[$name] ??= $factory($this);
+        });
+    }
+
+    public function make(string $name): mixed
+    {
+        if (!isset($this-&gt;bindings[$name])) {
+            throw new \RuntimeException("Не зарегистрирован биндинг: {$name}");
+        }
+        return ($this-&gt;bindings[$name])($this);
+    }
+}</code></pre>
+<pre><code>&lt;?php
+// src/13_container_v1.php
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';
+
+use App\Container\Container;
+use App\Domain\{InMemoryOrderRepository, OrderLogger, OrderService, OrderRepository};
+
+$container = new Container();
+$container-&gt;singleton(OrderRepository::class, fn() =&gt; new InMemoryOrderRepository());
+$container-&gt;singleton(OrderLogger::class, fn(Container $c) =&gt; new OrderLogger($c-&gt;make(OrderRepository::class)));
+$container-&gt;singleton(OrderService::class, fn(Container $c) =&gt; new OrderService($c-&gt;make(OrderLogger::class), $c-&gt;make(OrderRepository::class)));
+
+$service = $container-&gt;make(OrderService::class);
+$service-&gt;create(['drink' =&gt; 'Капучино', 'qty' =&gt; 1]);
+
+// доказательство, что singleton() даёт ОДИН И ТОТ ЖЕ экземпляр repo везде:
+$repoA = $container-&gt;make(OrderRepository::class);
+$repoB = $container-&gt;make(OrderRepository::class);
+var_dump($repoA === $repoB);        // предскажите: true или false?</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>залогировано
+bool(true)</pre></div>
+<div class="why"><b>Зачем:</b> Версия 1 УЖЕ решает проблему «тот же экземпляр repo everywhere» — <code>singleton()</code> кэширует результат первого вызова фабрики в <code>$this-&gt;instances</code>, и все последующие <code>make()</code> для того же имени возвращают именно его. Но проблема осталась ДРУГАЯ: каждый биндинг нужно написать РУКАМИ (<code>fn(Container $c) =&gt; new OrderLogger($c-&gt;make(...))</code>) — контейнер не понимает конструктор класса сам, вы всё ещё описываете граф зависимостей явно, просто в одном месте вместо трёх.</div>
+</div></div>
+<div class="step" id="step-6-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-6-3"></label><span class="num">Шаг 6.3</span>Контейнер v2: настоящий autowiring через ReflectionClass — параллель с Laravel Container<a class="anchor" href="#step-6-3">#</a></span><div class="step-body">
+<p>Версия 2 — настоящий autowiring через Reflection: контейнер САМ читает конструктор класса и резолвит зависимости по типам, без единой явной фабрики для классов без интерфейсов.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/Container/Container.php — ВЕРСИЯ 2: autowiring через Reflection, полностью переписан
+
+namespace App\Container;
+
+final class Container
+{
+    private array $bindings = [];
+    private array $instances = [];
+
+    public function bind(string $abstract, string|callable $concrete): void { $this-&gt;bindings[$abstract] = $concrete; }
+
+    public function singleton(string $abstract, string|callable $concrete): void
+    {
+        $this-&gt;bind($abstract, function (Container $c) use ($abstract, $concrete) {
+            return $this-&gt;instances[$abstract] ??= $this-&gt;build($concrete, $c);
+        });
+    }
+
+    public function make(string $name): mixed
+    {
+        if (isset($this-&gt;bindings[$name])) {
+            $concrete = $this-&gt;bindings[$name];
+            return is_callable($concrete) ? $concrete($this) : $this-&gt;build($concrete, $this);
+        }
+        return $this-&gt;build($name, $this);                          // НЕТ явного биндинга? Пробуем построить через Reflection напрямую
+    }
+
+    private function build(string|callable $concrete, Container $c): mixed
+    {
+        if (is_callable($concrete) &amp;&amp; !is_string($concrete)) return $concrete($c);
+
+        $reflection = new \ReflectionClass($concrete);
+        if (!$reflection-&gt;isInstantiable()) {
+            throw new \RuntimeException("{$concrete} нельзя создать напрямую — это интерфейс или abstract класс. Нужен явный bind().");
+        }
+
+        $constructor = $reflection-&gt;getConstructor();
+        if ($constructor === null) return new $concrete();            // нет конструктора — нет зависимостей, создаём напрямую
+
+        $dependencies = [];
+        foreach ($constructor-&gt;getParameters() as $param) {
+            $type = $param-&gt;getType();
+            if ($type === null || $type-&gt;isBuiltin()) {                  // скалярный тип (int, string) — Reflection не может его "угадать"
+                if ($param-&gt;isDefaultValueAvailable()) {
+                    $dependencies[] = $param-&gt;getDefaultValue();
+                    continue;
+                }
+                throw new \RuntimeException("Не могу разрешить параметр \${$param-&gt;getName()} без явного значения или дефолта");
+            }
+            $dependencies[] = $this-&gt;make($type-&gt;getName());              // РЕКУРСИЯ: зависимость может сама иметь зависимости
+        }
+        return $reflection-&gt;newInstanceArgs($dependencies);
+    }
+}</code></pre>
+<p>Предскажите: сколько строк биндингов теперь понадобится для <code>OrderLogger</code> и <code>OrderService</code>, у которых нет интерфейсов — только конкретные классы? А для <code>OrderRepository</code> (это ИНТЕРФЕЙС — Reflection не может понять, какую реализацию создать)?</p><pre><code>&lt;?php
+// src/14_container_v2.php
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';
+
+use App\Container\Container;
+use App\Domain\{InMemoryOrderRepository, OrderRepository, OrderLogger, OrderService};
+
+$container = new Container();
+$container-&gt;singleton(OrderRepository::class, InMemoryOrderRepository::class);   // ЕДИНСТВЕННЫЙ нужный биндинг — интерфейс не резолвится сам
+
+$service = $container-&gt;make(OrderService::class);      // OrderLogger и OrderService НИКОГДА не были явно забинжены!
+$service-&gt;create(['drink' =&gt; 'Раф', 'qty' =&gt; 1]);
+
+$repoA = $container-&gt;make(OrderRepository::class);
+$repoB = $container-&gt;make(OrderLogger::class);            // получить repo КОСВЕННО, через logger, и сравнить — тот же ли это repo
+var_dump($repoA === $container-&gt;make(OrderRepository::class));   // true — singleton</code></pre>
+<pre><code>docker compose exec app php src/14_container_v2.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>залогировано
+bool(true)</pre></div>
+<div class="why"><b>Зачем:</b> Единственный биндинг во всём файле — для интерфейса <code>OrderRepository</code>, потому что Reflection физически не может «угадать», какую из возможных реализаций интерфейса вы хотите (в этом суть интерфейса — их может быть много). <code>OrderLogger</code> и <code>OrderService</code> собраны АВТОМАТИЧЕСКИ: контейнер прочитал их конструкторы через <code>ReflectionClass</code>, увидел типы параметров, рекурсивно резолвил каждый (для <code>OrderService</code> это означало сначала построить <code>OrderLogger</code>, который сам зависит от <code>OrderRepository</code>) — ровно то же самое поведение, которое вы наблюдали КАК ПОТРЕБИТЕЛЬ в Laravel-лабе (раздел 5.1 Laravel-лабы: «контроллер получает зависимость» — теперь вы видите механизм изнутри).</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите единственный биндинг (<code>$container-&gt;singleton(OrderRepository::class, ...)</code>) и попробуйте <code>$container-&gt;make(OrderService::class)</code>. Прочитайте ТОЧНОЕ сообщение об исключении — на каком именно классе оно возникло (OrderService? OrderLogger? OrderRepository?) и почему именно на нём, а не раньше?</li><li>Добавьте в <code>OrderLogger</code> дополнительный конструкторный параметр <code>string $prefix = '[LOG]'</code> (скалярный, с дефолтом). Резолвится ли он автоматически? А если убрать дефолт — какое исключение бросит контейнер?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 6 → ПЕРЕД СЕССИЕЙ 7</span><ul>
+<li>✅ <code>git commit -am "session 6: own di container with reflection autowiring"</code></li>
+<li>📝 Ответы 6.1–6.3. Сравните свой Container.php с тем, что видели в Laravel-лабе, раздел 3 (Container и провайдеры) — найдите общие идеи.</li>
+<li>📖 Почитать: <a href="https://www.php.net/manual/ru/book.pdo.php" target="_blank">PHP: PDO</a>, <a href="https://www.php.net/manual/ru/function.session-start.php" target="_blank">session_start()</a>.</li>
+</ul></div>
+<div class="session-banner" id="session-7">Сессия <a href="#session-7" style="color:#fff;text-decoration:none">7</a> — PDO, сессии, CSRF, .env <span>~3,5 часа</span></div>
+<div class="step" id="step-7-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-7-1"></label><span class="num">Шаг 7.1</span>SQL-инъекция: найти уязвимость чтением, потом исправить prepared statement<a class="anchor" href="#step-7-1">#</a></span><div class="step-body">
+<p>Сначала — уязвимость. Читаем код, находим проблему ДО объяснения.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/15_pdo_vulnerable.php — НАЙДИТЕ уязвимость, прежде чем читать "под капотом"
+
+$pdo = new PDO('pgsql:host=postgres;dbname=coffee', 'coffee', 'coffee');
+
+$name = $_GET['name'] ?? '';
+$sql = "SELECT * FROM drinks WHERE name = '{$name}'";       // конкатенация пользовательского ввода прямо в SQL
+$stmt = $pdo-&gt;query($sql);</code></pre>
+<p>Предположите, что вернёт запрос, если в параметр name передать строку, содержащую апостроф и фрагмент <code>OR 1=1</code> (классическая SQL-инъекция). Не запускайте — просто мысленно подставьте такую строку в шаблон SQL выше и прочитайте, что получится.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// database/schema.sql — создать таблицы перед экспериментом
+// CREATE TABLE drinks (id SERIAL PRIMARY KEY, name TEXT, price INT);
+// INSERT INTO drinks (name, price) VALUES ('Эспрессо', 150), ('Латте', 250);
+
+// src/16_pdo_safe.php — ИСПРАВЛЕНО: prepared statement
+
+$pdo = new PDO('pgsql:host=postgres;dbname=coffee', 'coffee', 'coffee', [
+    PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION,               // без этого PDO молча игнорирует ошибки SQL!
+]);
+
+$name = $_GET['name'] ?? '';
+$stmt = $pdo-&gt;prepare('SELECT * FROM drinks WHERE name = :name');   // именованный placeholder, НЕ конкатенация
+$stmt-&gt;execute(['name' =&gt; $name]);
+$results = $stmt-&gt;fetchAll(PDO::FETCH_ASSOC);
+
+echo json_encode($results, JSON_UNESCAPED_UNICODE);</code></pre>
+<pre><code>docker compose exec app psql -h postgres -U coffee -d coffee -f database/schema.sql
+docker compose exec -d app php -S 0.0.0.0:8000 -t public
+
+curl -s "localhost:8000/pdo-vulnerable.php?name=Латте"                                   # обычный случай
+curl -s "localhost:8000/pdo-vulnerable.php?name=x%27%20OR%20%271%27=%271"                  # payload: апостроф + OR 1=1
+curl -s "localhost:8000/pdo-safe.php?name=x%27%20OR%20%271%27=%271"                          # тот же payload на безопасной версии</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre># уязвимая версия с обычным запросом: [{"id":2,"name":"Латте","price":250}]
+# уязвимая версия с инъекцией: [{"id":1,...}, {"id":2,...}]     ← ВСЕ строки таблицы! Условие превратилось в "OR 1=1" — всегда истинно
+# безопасная версия с тем же payload: []                          ← ищет напиток БУКВАЛЬНО с таким именем (его нет), инъекция не сработала</pre></div>
+<div class="why"><b>Зачем:</b> <code>prepare()</code> отправляет SQL-ШАБЛОН и значения параметров РАЗДЕЛЬНО — драйвер PostgreSQL получает переданное значение не как код SQL, а как ОДНО СТРОКОВОЕ значение для сравнения с колонкой <code>name</code>, буквально, апостроф и всё остальное как есть. Конкатенация в первом файле, напротив, вставляет пользовательский ввод ПРЯМО В ТЕКСТ SQL-запроса — апостроф внутри ввода «закрывает» строковый литерал раньше, чем задумано, и остаток становится исполняемым SQL-кодом. <code>PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION</code> — без него синтаксическая ошибка в SQL (например, от той же инъекции с опечаткой) молча возвращает <code>false</code> вместо исключения, и баг остаётся незамеченным.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Попробуйте инъекцию <code>?name=x%27%3B%20DROP%20TABLE%20drinks%3B%20--</code> на ОБЕИХ версиях (сначала на тестовой БД!). На уязвимой версии — сработает ли DROP TABLE через <code>query()</code> с несколькими выражениями? (Подсказка: зависит от того, разрешает ли драйвер multi-statement; сам факт, что это вообще ОБСУЖДАЕТСЯ как риск, — уже причина никогда так не писать.)</li><li>Что произойдёт на безопасной версии с тем же payload? Объясните разницу.</li></ul></div>
+</div></div>
+<div class="step" id="step-7-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-7-2"></label><span class="num">Шаг 7.2</span>Транзакция: предсказать поведение rollBack после частично выполненных операций<a class="anchor" href="#step-7-2">#</a></span><div class="step-body">
+<p>Транзакция — предскажите поведение при ошибке ПОСЕРЕДИНЕ операции, затем проверьте на реальных данных.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/17_transactions.php
+
+$pdo = new PDO('pgsql:host=postgres;dbname=coffee', 'coffee', 'coffee', [PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION]);
+
+function reserveStock(PDO $pdo, string $drinkName, int $qty): void
+{
+    $pdo-&gt;beginTransaction();
+    try {
+        $stmt = $pdo-&gt;prepare('SELECT price FROM drinks WHERE name = :name FOR UPDATE');   // FOR UPDATE — блокировка строки на время транзакции
+        $stmt-&gt;execute(['name' =&gt; $drinkName]);
+        $price = $stmt-&gt;fetchColumn();
+        if ($price === false) throw new RuntimeException("Напиток {$drinkName} не найден");
+
+        $pdo-&gt;prepare('INSERT INTO orders (drink_name, qty, total) VALUES (:name, :qty, :total)')
+            -&gt;execute(['name' =&gt; $drinkName, 'qty' =&gt; $qty, 'total' =&gt; $price * $qty]);
+
+        if ($qty &gt; 100) throw new RuntimeException('подозрительно большое количество');    // ИСКУССТВЕННЫЙ сбой ПОСЛЕ вставки заказа
+
+        $pdo-&gt;commit();
+        echo "Заказ создан\n";
+    } catch (Throwable $e) {
+        $pdo-&gt;rollBack();                                          // предскажите: останется ли запись в orders после rollBack?
+        echo "Откат: {$e-&gt;getMessage()}\n";
+    }
+}
+
+reserveStock($pdo, 'Латте', 2);          // обычный случай — должен пройти
+reserveStock($pdo, 'Латте', 200);         // искусственный сбой ПОСЛЕ INSERT — предскажите итог</code></pre>
+<pre><code>docker compose exec app psql -h postgres -U coffee -d coffee -c "CREATE TABLE IF NOT EXISTS orders (id SERIAL PRIMARY KEY, drink_name TEXT, qty INT, total INT);"
+docker compose exec app php src/17_transactions.php
+docker compose exec app psql -h postgres -U coffee -d coffee -c "SELECT * FROM orders;"</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>Заказ создан
+Откат: подозрительно большое количество
+
+ id | drink_name | qty | total
+----+------------+-----+-------
+  1 | Латте      |   2 |   500
+(1 row)                                    ← ВТОРОЙ заказ (qty=200) НЕ появился, несмотря на то что INSERT физически выполнился ДО throw</pre></div>
+<div class="why"><b>Зачем:</b> Строка <code>INSERT INTO orders ...</code> ФИЗИЧЕСКИ выполнилась до того, как сработал искусственный <code>throw</code> — но <code>rollBack()</code> отменяет ВСЕ изменения, сделанные с момента <code>beginTransaction()</code>, включая уже выполненные, но ещё не закоммиченные операторы. Это и есть смысл транзакции: набор операций либо применяется ЦЕЛИКОМ (после <code>commit()</code>), либо не применяется ВООБЩЕ (после <code>rollBack()</code>) — независимо от того, на каком шаге внутри транзакции произошёл сбой. <code>FOR UPDATE</code> блокирует строку <code>drinks</code> на время транзакции — если бы два запроса одновременно пытались зарезервировать последний Латте, второй бы ждал, пока первый завершится (commit или rollback), избегая гонки за остаток товара.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите <code>FOR UPDATE</code> из SELECT. Придумайте сценарий с ДВУМЯ одновременными запросами на последнюю единицу товара, где отсутствие блокировки привело бы к продаже товара дважды (это концептуальный вопрос — реальную гонку из двух PHP-процессов вы уже видели похожей в JS-лабе, раздел про AbortController, только природа гонки другая).</li><li>Что произойдёт, если забыть вызвать <code>$pdo-&gt;commit()</code> вообще (ни commit, ни rollback, скрипт просто завершается)? Проверьте документацию PDO — сохранятся ли изменения?</li></ul></div>
+</div></div>
+<div class="step" id="step-7-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-7-3"></label><span class="num">Шаг 7.3</span>CSRF-токен своими руками: сессия, hash_equals, форма + проверка<a class="anchor" href="#step-7-3">#</a></span><div class="step-body">
+<p>CSRF-токен руками — то, что скрыто за <code>@csrf</code> в Blade. Собираем по шагам: сначала форма БЕЗ защиты (уязвима), потом с токеном.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/Support/Csrf.php
+
+namespace App\Support;
+
+final class Csrf
+{
+    public static function token(): string
+    {
+        session_start();                                        // идемпотентно — если сессия уже стартовала, ничего не сломает
+        return $_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));   // сгенерировать ОДИН раз на сессию, переиспользовать
+    }
+
+    public static function verify(?string $submitted): bool
+    {
+        session_start();
+        $expected = $_SESSION['csrf_token'] ?? null;
+        return $expected !== null &amp;&amp; $submitted !== null &amp;&amp; hash_equals($expected, $submitted);   // hash_equals — защита от timing-атак
+    }
+}</code></pre>
+<p>Предскажите: зачем нужен именно <code>hash_equals()</code>, а не обычный <code>===</code> для сравнения токенов? В чём разница по поведению для ДВУХ РАЗНЫХ невалидных токенов?</p><pre><code>&lt;?php
+// public/order-form.php — форма с CSRF-защитой
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';
+use App\Support\Csrf;
+
+$token = Csrf::token();
+echo &lt;&lt;&lt;HTML
+&lt;form method="POST" action="/order-submit.php"&gt;
+    &lt;input type="hidden" name="_csrf" value="{$token}"&gt;
+    &lt;input type="text" name="drink" placeholder="Напиток"&gt;
+    &lt;button&gt;Заказать&lt;/button&gt;
+&lt;/form&gt;
+HTML;</code></pre>
+<pre><code>&lt;?php
+// public/order-submit.php
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';
+use App\Support\Csrf;
+
+header('Content-Type: application/json; charset=utf-8');
+
+if (!Csrf::verify($_POST['_csrf'] ?? null)) {
+    http_response_code(419);                                    // тот же код, что использует Laravel (Laravel-лаба, раздел 6.1 — Sanctum SPA CSRF)
+    echo json_encode(['error' =&gt; 'Токен CSRF недействителен или отсутствует']);
+    exit;
+}
+echo json_encode(['order' =&gt; $_POST['drink'] ?? null, 'status' =&gt; 'создан']);</code></pre>
+<pre><code>curl -s localhost:8000/order-form.php | grep _csrf                                       # достать токен из формы
+curl -s -X POST localhost:8000/order-submit.php -d "drink=Латте&amp;_csrf=ПОДДЕЛЬНЫЙ"          # неверный токен
+curl -s -X POST localhost:8000/order-submit.php -d "drink=Латте"                            # токен вообще отсутствует</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>{"error":"Токен CSRF недействителен или отсутствует"}
+{"error":"Токен CSRF недействителен или отсутствует"}</pre><p>Оба запроса без корректного токена отклонены с кодом 419 — тем же, что вы видели в Laravel-лабе при провале Sanctum CSRF-проверки. Чтобы пройти проверку успешно, нужна РЕАЛЬНАЯ сессия: сначала GET на <code>/order-form.php</code> с сохранением cookie (<code>curl -c cookies.txt</code>), потом POST с этим же cookie и токеном, вычитанным из HTML формы.</p></div>
+<div class="why"><b>Зачем:</b> <code>hash_equals()</code> сравнивает строки за КОНСТАНТНОЕ время независимо от того, на каком символе они разошлись — обычный <code>===</code> для строк останавливается на первом несовпадающем байте, и разница во времени выполнения (доли микросекунд) теоретически позволяет атакующему подбирать токен побайтово, измеряя задержку ответа сервера (timing attack). На практике для CSRF-токена это менее критично, чем для сравнения паролей/подписей, но <code>hash_equals</code> — правильная привычка для ЛЮБОГО сравнения секретных значений.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Выполните полный цикл через <code>curl -c cookies.txt -b cookies.txt</code>: сначала GET формы с сохранением cookie, вытащите токен, потом POST с тем же cookie и правильным токеном. Добейтесь ответа <code>{"order":"Латте","status":"создан"}</code>.</li><li>Что произойдёт, если открыть форму в ОДНОЙ сессии (одном browser/curl -c), а отправить форму с cookie от ДРУГОЙ сессии? Проверьте — должно провалиться, и объясните, какую атаку это предотвращает (подсказка: название самой уязвимости — Cross-Site Request Forgery).</li></ul></div>
+</div></div>
+<div class="step" id="step-7-4"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-7-4"></label><span class="num">Шаг 7.4</span>Свой .env-парсер: 15 строк вместо phpdotenv, и ловушка строкового "true"<a class="anchor" href="#step-7-4">#</a></span><div class="step-body">
+<p>Свой .env-парсер — то, что <code>vlucas/phpdotenv</code> делает под капотом, минимальная версия в 15 строк.</p><pre><code># .env — в корне проекта, добавить в .gitignore!
+DB_HOST=postgres
+DB_NAME=coffee
+DB_USER=coffee
+DB_PASSWORD=coffee
+APP_DEBUG=true</code></pre>
+<pre><code>&lt;?php
+declare(strict_types=1);
+// src/Support/Env.php
+
+namespace App\Support;
+
+final class Env
+{
+    private static array $vars = [];
+
+    public static function load(string $path): void
+    {
+        if (!file_exists($path)) return;
+        foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+            $line = trim($line);
+            if ($line === '' || str_starts_with($line, '#')) continue;      // пропустить пустые строки и комментарии
+            [$key, $value] = array_pad(explode('=', $line, 2), 2, '');       // разбить ТОЛЬКО по первому =, значение может содержать =
+            self::$vars[trim($key)] = trim($value, " \t\"'");                  // обрезать пробелы И возможные кавычки вокруг значения
+        }
+    }
+
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        return self::$vars[$key] ?? $default;
+    }
+}</code></pre>
+<p>Предскажите: что вернёт <code>Env::get('APP_DEBUG')</code> — булево <code>true</code> или строку <code>"true"</code>? Это важно для кода вида <code>if (Env::get('APP_DEBUG')) { ... }</code>.</p><pre><code>&lt;?php
+// src/18_env.php
+declare(strict_types=1);
+require __DIR__ . '/../vendor/autoload.php';
+use App\Support\Env;
+
+Env::load(__DIR__ . '/../.env');
+
+var_dump(Env::get('DB_HOST'));
+var_dump(Env::get('APP_DEBUG'));
+var_dump(Env::get('APP_DEBUG') === true);       // предскажите: true или false?
+var_dump(Env::get('MISSING_KEY', 'default'));</code></pre>
+<pre><code>docker compose exec app php src/18_env.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>string(8) "postgres"
+string(4) "true"
+bool(false)                                     ← СТРОКА "true" НЕ равна булевому true через ===!
+string(7) "default"</pre></div>
+<div class="why"><b>Зачем:</b> Файл <code>.env</code> — обычный текст, все значения читаются как СТРОКИ; <code>"true"</code> — не специальный синтаксис, а просто четыре символа. <code>Env::get('APP_DEBUG') === true</code> возвращает <code>false</code>, потому что сравнивает строку с булевым значением строго — та же ловушка типов, что обсуждалась в разделе 2, только теперь на реальном примере конфигурации. Правильный способ: <code>Env::get('APP_DEBUG') === 'true'</code> (строка) или явное приведение <code>filter_var(Env::get('APP_DEBUG'), FILTER_VALIDATE_BOOL)</code>. Именно эту проблему решает <code>vlucas/phpdotenv</code> — он умеет опционально кастовать булевы-подобные строки.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Добавьте в <code>Env</code> метод <code>getBool(string $key, bool $default = false): bool</code>, корректно превращающий строки <code>"true"/"false"/"1"/"0"</code> в булево значение. Как обработать регистр (<code>"True"</code>, <code>"TRUE"</code>)?</li><li>Что произойдёт, если строка в <code>.env</code> содержит символ <code>=</code> внутри значения, например <code>DB_URL=postgres://user:pass@host/db?opt=1</code>? Проверьте, корректно ли парсер разбивает такую строку благодаря <code>explode('=', $line, 2)</code> с лимитом 2.</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 7 → ПЕРЕД СЕССИЕЙ 8</span><ul>
+<li>✅ <code>git commit -am "session 7: pdo, sessions, csrf, env"</code></li>
+<li>📝 Ответы 7.1–7.4. Все инфраструктурные кубики готовы — сессия 8 собирает их в REST API.</li>
+<li>📖 Почитать: <a href="https://laravel.com/docs/13.x/middleware" target="_blank">Laravel: Middleware</a> — вспомнить, как выглядит middleware-цепочка, прежде чем строить свою.</li>
+</ul></div>
+<div class="session-banner" id="session-8">Сессия <a href="#session-8" style="color:#fff;text-decoration:none">8</a> — Финал: REST API + сравнение с Laravel <span>~4 часа</span></div>
+<div class="step" id="step-8-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-8-1"></label><span class="num">Шаг 8.1</span>Сборка: index.php склеивает Container + Router + PDO + Env — предсказать порядок, потом сверить<a class="anchor" href="#step-8-1">#</a></span><div class="step-body">
+<p>Собираем все кубики сессий 5-7 в один <code>public/index.php</code>. Сначала — предсказать структуру потока запроса по памяти, без подглядывания в раздел 12, потом свериться.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// database/schema.sql — полная схема для финального API
+// CREATE TABLE drinks (id SERIAL PRIMARY KEY, name TEXT NOT NULL, price INT NOT NULL, category TEXT NOT NULL);
+// CREATE TABLE orders (id SERIAL PRIMARY KEY, drink_id INT REFERENCES drinks(id), qty INT NOT NULL, total INT NOT NULL, created_at TIMESTAMP DEFAULT now());
+// INSERT INTO drinks (name, price, category) VALUES ('Эспрессо',150,'coffee'), ('Латте',250,'coffee'), ('Чай',120,'tea');</code></pre>
+<pre><code>&lt;?php
+declare(strict_types=1);
+// src/Persistence/PdoConnection.php
+
+namespace App\Persistence;
+
+final class PdoConnection extends \PDO
+{
+    public function __construct(string $host, string $db, string $user, string $password)
+    {
+        parent::__construct("pgsql:host={$host};dbname={$db}", $user, $password, [
+            \PDO::ATTR_ERRMODE =&gt; \PDO::ERRMODE_EXCEPTION,
+            \PDO::ATTR_DEFAULT_FETCH_MODE =&gt; \PDO::FETCH_ASSOC,
+        ]);
+    }
+}</code></pre>
+<pre><code>&lt;?php
+declare(strict_types=1);
+// src/Http/Response.php
+
+namespace App\Http;
+
+final class Response
+{
+    public static function json(mixed $data, int $status = 200): never
+    {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+        exit;                                    // never — метод ГАРАНТИРОВАННО не возвращает управление, это часть контракта типа
+    }
+}</code></pre>
+<pre><code>&lt;?php
+declare(strict_types=1);
+// src/Controllers/MenuController.php
+
+namespace App\Controllers;
+
+use App\Persistence\PdoConnection;
+use App\Http\Response;
+
+final class MenuController
+{
+    public function __construct(private PdoConnection $db) {}          // autowiring из сессии 6 резолвит это САМ
+
+    public function index(array $params): never
+    {
+        $stmt = $this-&gt;db-&gt;query('SELECT * FROM drinks ORDER BY category, price');
+        Response::json($stmt-&gt;fetchAll());
+    }
+}
+
+// src/Controllers/OrderController.php
+namespace App\Controllers;
+
+final class OrderController
+{
+    public function __construct(private PdoConnection $db) {}
+
+    public function store(array $params): never
+    {
+        $body = json_decode(file_get_contents('php://input'), associative: true) ?? [];
+        $drinkId = (int) ($body['drink_id'] ?? 0);
+        $qty = (int) ($body['qty'] ?? 0);
+
+        if ($drinkId &lt;= 0 || $qty &lt;= 0) {
+            Response::json(['error' =&gt; 'drink_id и qty обязательны и должны быть положительными'], 422);
+        }
+
+        $this-&gt;db-&gt;beginTransaction();
+        try {
+            $stmt = $this-&gt;db-&gt;prepare('SELECT price FROM drinks WHERE id = :id FOR UPDATE');
+            $stmt-&gt;execute(['id' =&gt; $drinkId]);
+            $price = $stmt-&gt;fetchColumn();
+            if ($price === false) { $this-&gt;db-&gt;rollBack(); Response::json(['error' =&gt; 'Напиток не найден'], 404); }
+
+            $total = $price * $qty;
+            $this-&gt;db-&gt;prepare('INSERT INTO orders (drink_id, qty, total) VALUES (:d, :q, :t)')
+                -&gt;execute(['d' =&gt; $drinkId, 'q' =&gt; $qty, 't' =&gt; $total]);
+            $this-&gt;db-&gt;commit();
+
+            Response::json(['order' =&gt; ['drink_id' =&gt; $drinkId, 'qty' =&gt; $qty, 'total' =&gt; $total]], 201);
+        } catch (\Throwable $e) {
+            $this-&gt;db-&gt;rollBack();
+            Response::json(['error' =&gt; 'Не удалось создать заказ'], 500);
+        }
+    }
+
+    public function index(array $params): never
+    {
+        $stmt = $this-&gt;db-&gt;query('SELECT o.*, d.name AS drink_name FROM orders o JOIN drinks d ON d.id = o.drink_id ORDER BY o.created_at DESC');
+        Response::json($stmt-&gt;fetchAll());
+    }
+}</code></pre>
+<p>ПРЕЖДЕ чем писать <code>public/index.php</code> — на бумаге распишите порядок из пяти шагов: где создаётся контейнер, где регистрируются маршруты, где определяется, какой контроллер вызвать, где резолвится <code>PdoConnection</code>, где вызывается конкретный метод. Сверьтесь с кодом ниже.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// public/index.php — единственная точка входа
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use App\Container\Container;
+use App\Http\{Router, Response};
+use App\Persistence\PdoConnection;
+use App\Support\Env;
+use App\Controllers\{MenuController, OrderController};
+
+Env::load(__DIR__ . '/../.env');
+
+$container = new Container();
+$container-&gt;singleton(PdoConnection::class, fn() =&gt; new PdoConnection(
+    Env::get('DB_HOST', 'postgres'), Env::get('DB_NAME', 'coffee'), Env::get('DB_USER', 'coffee'), Env::get('DB_PASSWORD', 'coffee'),
+));
+
+$router = new Router();
+$router-&gt;get('/menu', fn($params) =&gt; $container-&gt;make(MenuController::class)-&gt;index($params));
+$router-&gt;get('/orders', fn($params) =&gt; $container-&gt;make(OrderController::class)-&gt;index($params));
+$router-&gt;post('/orders', fn($params) =&gt; $container-&gt;make(OrderController::class)-&gt;store($params));
+
+try {
+    $router-&gt;dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+} catch (\Throwable $e) {
+    error_log($e-&gt;getMessage());
+    Response::json(['error' =&gt; 'Внутренняя ошибка сервера'], 500);
+}</code></pre>
+<pre><code>docker compose exec app psql -h postgres -U coffee -d coffee -f database/schema.sql
+docker compose exec -d app php -S 0.0.0.0:8000 -t public
+curl -s localhost:8000/menu | jq
+curl -s -X POST localhost:8000/orders -d '{"drink_id":2,"qty":3}' | jq
+curl -s -X POST localhost:8000/orders -d '{"drink_id":999,"qty":1}' | jq
+curl -s -X POST localhost:8000/orders -d '{"qty":1}' | jq
+curl -s localhost:8000/orders | jq</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>[{"id":1,"name":"Эспрессо",...}, {"id":2,"name":"Латте",...}, ...]
+{"order":{"drink_id":2,"qty":3,"total":750}}
+{"error":"Напиток не найден"}
+{"error":"drink_id и qty обязательны и должны быть положительными"}
+[{"id":1,"drink_id":2,"qty":3,"total":750,"drink_name":"Латте",...}]</pre></div>
+<div class="why"><b>Зачем:</b> Каждая строка <code>index.php</code> — вызов инфраструктуры, которую вы САМИ написали в предыдущих сессиях: <code>Container</code> (6.3) резолвит <code>MenuController</code> и <code>OrderController</code> автоматически, включая их зависимость от <code>PdoConnection</code>; <code>Router</code> (5.2) сопоставляет путь с обработчиком; <code>Env</code> (7.4) даёт конфигурацию БД без хардкода. <code>never</code> как тип возврата у <code>Response::json</code> — гарантия компилятору и читателю, что после вызова этого метода код дальше не пойдёт (внутри <code>exit</code>) — PHP проверит это статически при достаточно новой версии и линтерах.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Добавьте маршрут <code>DELETE /orders/{id}</code>. Понадобится ли менять <code>Router</code> — вспомните, поддерживает ли он метод <code>delete()</code>, и если нет, добавьте его по аналогии с <code>get</code>/<code>post</code>.</li><li>Что произойдёт при одновременных двух запросах <code>POST /orders</code> на последнюю единицу товара (представьте, что в <code>drinks</code> есть колонка <code>stock</code>, которую нужно проверять и уменьшать)? Как <code>FOR UPDATE</code> из сессии 7 защитил бы от продажи товара дважды — опишите словами, не пишите код.</li></ul></div>
+</div></div>
+<div class="step" id="step-8-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-8-2"></label><span class="num">Шаг 8.2</span>Middleware-цепочка через array_reduce: предсказать порядок "матрёшки", потом проверить<a class="anchor" href="#step-8-2">#</a></span><div class="step-body">
+<p>Middleware-цепочка своими руками — та же идея Decorator, что в Laravel-лабе (раздел 6 Laravel-лабы), но собранная руками из массива callable.</p><pre><code>&lt;?php
+declare(strict_types=1);
+// src/Http/Router.php — ДОБАВИТЬ поддержку middleware
+
+namespace App\Http;
+
+final class Router
+{
+    private array $routes = [];
+    private array $globalMiddleware = [];
+
+    public function middleware(callable $mw): void { $this-&gt;globalMiddleware[] = $mw; }
+
+    // ... get()/post()/add() как в 5.2, плюс сохранение $middleware для конкретного маршрута ...
+
+    public function dispatch(string $method, string $uri): mixed
+    {
+        $path = parse_url($uri, PHP_URL_PATH) ?? '/';
+        foreach ($this-&gt;routes as $route) {
+            if ($route['method'] !== $method) continue;
+            if (preg_match($route['pattern'], $path, $matches)) {
+                $params = array_combine($route['paramNames'], array_slice($matches, 1));
+
+                $pipeline = array_reduce(                              // строим ВЛОЖЕННЫЕ замыкания из middleware, ИЗНУТРИ НАРУЖУ
+                    array_reverse($this-&gt;globalMiddleware),
+                    fn($next, $mw) =&gt; fn($params) =&gt; $mw($params, $next),
+                    $route['handler'],                                    // самый внутренний слой — сам обработчик маршрута
+                );
+                return $pipeline($params);
+            }
+        }
+        http_response_code(404);
+        return ['error' =&gt; 'Not Found'];
+    }
+}</code></pre>
+<p>Прежде чем читать дальше — предскажите порядок вывода при ДВУХ middleware (A и B, в этом порядке регистрации) вокруг обработчика H: A выполнится до или после B? "До" H или "после" H, и в каком порядке "до"/"после" для A и B?</p><pre><code>&lt;?php
+// src/19_middleware_order.php — проверка порядка на упрощённом примере (без реального Router)
+declare(strict_types=1);
+
+function middlewareA($params, $next) { echo "A: до\n"; $result = $next($params); echo "A: после\n"; return $result; }
+function middlewareB($params, $next) { echo "B: до\n"; $result = $next($params); echo "B: после\n"; return $result; }
+function handler($params) { echo "H: обработчик\n"; return 'готово'; }
+
+$pipeline = array_reduce(
+    array_reverse(['middlewareA', 'middlewareB']),
+    fn($next, $mw) =&gt; fn($params) =&gt; $mw($params, $next),
+    'handler',
+);
+$pipeline([]);</code></pre>
+<pre><code>docker compose exec app php src/19_middleware_order.php</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>A: до
+B: до
+H: обработчик
+B: после
+A: после</pre><p>Порядок «матрёшкой»: A регистрировался ПЕРВЫМ, поэтому оборачивает всё остальное СНАРУЖИ — его код «до» выполняется первым, а код «после» — последним. Если ваше предсказание совпало — вы правильно поняли механизм вложенных замыканий; если нет, перечитайте <code>array_reduce</code> с <code>array_reverse</code> ещё раз, посимвольно проследив, что происходит на каждой итерации.</p></div>
+<div class="why"><b>Зачем:</b> <code>array_reduce</code> с <code>array_reverse</code> строит цепочку замыканий ИЗНУТРИ НАРУЖУ: начинаем с <code>handler</code> как самого внутреннего слоя, оборачиваем его в <code>middlewareB</code> (последний в исходном порядке — обрабатывается первым при reverse), затем результат оборачиваем в <code>middlewareA</code>. Итоговый <code>$pipeline</code> — это <code>middlewareA</code>, внутри которого при вызове <code>$next()</code> находится <code>middlewareB</code>, внутри которого — сам <code>handler</code>. Это ТОЧНО тот же паттерн Pipeline, что использует Laravel для HTTP-middleware (Laravel-лаба, раздел 6.1: <code>Pipeline::through([...])-&gt;then(...)</code>) — вы только что построили его упрощённую версию руками.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Поменяйте местами регистрацию: <code>['middlewareB', 'middlewareA']</code> вместо <code>['middlewareA', 'middlewareB']</code>. Предскажите НОВЫЙ порядок вывода, затем проверьте.</li><li>Добавьте третье middleware C, которое НЕ вызывает <code>$next($params)</code> вообще (например, потому что хочет прервать цепочку — как middleware авторизации в Laravel-лабе, отклоняющий запрос до контроллера). Что произойдёт с H и с middleware, зарегистрированными ПОСЛЕ C?</li></ul></div>
+</div></div>
+<div class="step" id="step-8-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-8-3"></label><span class="num">Шаг 8.3</span>Тесты PHPUnit + финальная таблица «что Laravel даёт бесплатно»<a class="anchor" href="#step-8-3">#</a></span><div class="step-body">
+<p>Финал: несколько тестов PHPUnit + большая таблица «что Laravel даёт бесплатно» — построчно, как в JS-лабе для Vue.</p><pre><code>docker compose exec app composer require --dev phpunit/phpunit</code></pre>
+<pre><code>&lt;?php
+declare(strict_types=1);
+// tests/RouterTest.php
+
+use PHPUnit\Framework\TestCase;
+use App\Http\Router;
+
+final class RouterTest extends TestCase
+{
+    public function test_matches_route_with_parameter(): void
+    {
+        $router = new Router();
+        $router-&gt;get('/orders/{id}', fn($params) =&gt; $params);
+
+        $result = $router-&gt;dispatch('GET', '/orders/42');
+
+        $this-&gt;assertSame(['id' =&gt; '42'], $result);
+    }
+
+    public function test_returns_404_for_unmatched_route(): void
+    {
+        $router = new Router();
+        $result = $router-&gt;dispatch('GET', '/nowhere');
+
+        $this-&gt;assertSame(['error' =&gt; 'Not Found'], $result);
+    }
+}
+
+// tests/ContainerTest.php
+use App\Container\Container;
+
+final class ContainerTest extends TestCase
+{
+    public function test_autowires_class_without_explicit_binding(): void
+    {
+        $container = new Container();
+        $instance = $container-&gt;make(SimpleClassWithNoConstructor::class);
+
+        $this-&gt;assertInstanceOf(SimpleClassWithNoConstructor::class, $instance);
+    }
+
+    public function test_singleton_returns_same_instance(): void
+    {
+        $container = new Container();
+        $container-&gt;singleton(SimpleClassWithNoConstructor::class, SimpleClassWithNoConstructor::class);
+
+        $this-&gt;assertSame($container-&gt;make(SimpleClassWithNoConstructor::class), $container-&gt;make(SimpleClassWithNoConstructor::class));
+    }
+}
+final class SimpleClassWithNoConstructor {}</code></pre>
+<pre><code>docker compose exec app vendor/bin/phpunit tests</code></pre>
+<div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>PHPUnit ...
+..                                                                   4 / 4 (100%)
+
+OK (4 tests, 5 assertions)</pre></div>
+<pre>php-lab/src/
+├── Domain/          Money, Drink, Order — та же бизнес-логика, что в ООП-лабе, переписана с нуля
+├── Http/             Router (regex-параметры + middleware-пайплайн), Response
+├── Container/         Container с autowiring через ReflectionClass
+├── Persistence/        PdoConnection: prepared statements, транзакции
+├── Support/            Env (свой .env), Csrf (hash_equals)
+└── Controllers/         MenuController, OrderController — тонкие, вся инфраструктура снаружи</pre>
+<table>
+<tr><th>Что делает Laravel</th><th>Что вы написали руками</th><th>Строк</th><th>Чего не хватает вашей версии</th></tr>
+<tr><td>Service Container</td><td>Container.php: ReflectionClass autowiring</td><td>~40</td><td>contextual binding, deferred providers, теги, resolving-хуки (Laravel-лаба, раздел 5.3)</td></tr>
+<tr><td>Router + Route::apiResource</td><td>Router.php: regex-параметры + пайплайн</td><td>~35</td><td>именованные маршруты, группы с общим префиксом/middleware, route model binding, кэширование скомпилированных маршрутов</td></tr>
+<tr><td>Eloquent ORM</td><td>голый PDO с prepared statements</td><td>0 (сознательно)</td><td>ВСЁ: связи, casts, события модели, миграции, query builder — вся Laravel-лаба, раздел 4, посвящена этому</td></tr>
+<tr><td>Middleware pipeline</td><td>array_reduce + array_reverse</td><td>~10</td><td>параметры middleware (<code>role:admin</code>), terminable middleware, приоритет групп</td></tr>
+<tr><td>Form Request валидация</td><td>ручные if в контроллере (<code>$drinkId &lt;= 0</code>)</td><td>~5 на маршрут</td><td>декларативные правила, автогенерация 422-ответа, кастомные сообщения — всё то, что писать руками на каждый маршрут утомительно</td></tr>
+<tr><td>Sanctum CSRF</td><td>Csrf.php: session + hash_equals</td><td>~15</td><td>интеграция с cookie-based SPA-аутентификацией, автоматическая простановка токена во все формы</td></tr>
+<tr><td>Facades (Cache::, Log::)</td><td>__callStatic пример из 4.3</td><td>~10</td><td>полноценный реестр фасадов, alias-резолюция, тестируемость через <code>::fake()</code></td></tr>
+<tr><td>Artisan (make:controller и т.д.)</td><td>нет — файлы создаются руками</td><td>0</td><td>генерация шаблонного кода, миграции, seeders — вся экосистема консольных команд</td></tr>
+</table>
+<div class="why"><b>Зачем:</b> Разница не в том, что Laravel «умнее вас» — вы только что написали работающий Container с настоящим autowiring через Reflection, работающий Router с параметрами и middleware, безопасный слой работы с БД. Разница — в объёме РЕШЁННЫХ КРАЕВЫХ СЛУЧАЕВ и в экосистеме вокруг: 40 строк вашего Container не поддерживают contextual binding, который понадобится в проекте с двумя реализациями одного интерфейса для разных потребителей (Laravel-лаба, раздел 5.3); 35 строк вашего Router не умеют именованные маршруты, без которых при рефакторинге путей придётся руками искать все места, где путь захардкожен строкой. Теперь, открывая исходники <code>vendor/laravel/framework</code>, вы увидите не «магию», а более полную версию того, что уже написали сами.</div>
+<div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Пройдите по всем восьми сессиям и для каждой назовите одну концепцию, которая до этой лабы казалась «магией» Laravel, а теперь понятна как код, который вы сами написали или могли бы написать.</li><li>Сравните эту таблицу с аналогичной таблицей «vanilla vs Vue» из JS-лабы (раздел 8.4 JS-лабы). Какой общий паттерн виден в ОБЕИХ таблицах — что именно фреймворки почти всегда добавляют сверх «рабочего ядра», которое вы написали руками?</li></ul></div>
+</div></div>
+<div class="next-box"><span class="tag">ИТОГ СЕССИИ 8</span><ul>
+<li>✅ <code>git commit -am "session 8: rest api, middleware, laravel comparison"</code></li>
+<li>📝 Ответы 8.1–8.3. Теперь раздел 16 — письменно, как финальная проверка.</li>
+</ul></div>
+
+<h2 id="sec-14"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-14"></label>14. Чек-лист: концепция ↔ где она в коде <a class="anchor" href="#sec-14">#</a></h2>
+
+<table>
+<tr><th>Концепция</th><th>Где в коде</th><th>Одна фраза</th></tr>
+<tr><td>strict_types, TypeError</td><td>1.2: с strict_types и без, бок о бок</td><td>строгость файла, не глобальная настройка</td></tr>
+<tr><td>== в PHP 8 vs PHP 7</td><td>1.2: таблица сравнений живьём</td><td>0 == 'abc' поменяло значение между версиями</td></tr>
+<tr><td>Copy-on-write массивов</td><td>2.1: измерение памяти в момент физической копии</td><td>PHP-массив — значение, но копия ленивая</td></tr>
+<tr><td>array_filter сохраняет ключи, usort сбрасывает</td><td>2.2: на данных кофейни</td><td>array_values() нужен перед json_encode на "дырявых" массивах</td></tr>
+<tr><td>mb_* vs обычные строковые функции</td><td>2.3: strlen vs mb_strlen на кириллице</td><td>strlen считает байты, mb_strlen — символы</td></tr>
+<tr><td>$_GET/$_POST/php://input</td><td>3.1-3.2: предсказание → curl → проверка</td><td>суперглобалы — то, что Request-объект оборачивает</td></tr>
+<tr><td>Exception vs Error, finally, set_exception_handler</td><td>3.3: порядок finally vs handler предсказан и проверен</td><td>finally выполняется даже при непойманном исключении</td></tr>
+<tr><td>use ($var) vs use (&$var)</td><td>4.1: чтение кода, предсказание, только потом запуск</td><td>use по значению защищает от JS-бага var-в-цикле</td></tr>
+<tr><td>Генераторы: ленивое чтение больших файлов</td><td>4.2: измерение памяти eager vs lazy</td><td>yield не читает всё сразу, а по одной итерации</td></tr>
+<tr><td>Магические методы: __get/__set/__callStatic</td><td>4.3: свой фасад собран по шагам</td><td>то, на чём стоят Eloquent и фасады Laravel</td></tr>
+<tr><td>match, nullsafe ?->, ??</td><td>4.4: неполные данные заказа Order→Customer→Address</td><td>short-circuit останавливается на первом null</td></tr>
+<tr><td>Composer PSR-4 автозагрузка</td><td>5.1: с автозагрузкой и без, бок о бок</td><td>один require вместо десятков</td></tr>
+<tr><td>Свой роутер: v1 наивный → v2 с параметрами</td><td>5.2: версия 1 намеренно ломается, версия 2 чинит</td><td>regex-параметры — не магия, а preg_replace_callback</td></tr>
+<tr><td>Свой DI-контейнер: v1 фабрики → v2 autowiring</td><td>6.1-6.3: боль → service locator → Reflection</td><td>то, что Laravel Container делает под капотом (Laravel-лаба, раздел 5)</td></tr>
+<tr><td>PDO prepared statements vs SQL-инъекция</td><td>7.1: уязвимость найдена чтением, потом исправлена</td><td>параметры отправляются отдельно от SQL-текста</td></tr>
+<tr><td>Транзакции: commit/rollBack, FOR UPDATE</td><td>7.2: предсказание поведения rollBack, потом проверка</td><td>всё или ничего, независимо от того, где случился сбой</td></tr>
+<tr><td>CSRF: сессия + hash_equals</td><td>7.3: форма без защиты → с токеном</td><td>то, что даёт @csrf в Blade</td></tr>
+<tr><td>Свой .env-парсер</td><td>7.4: строка "true" ≠ булево true</td><td>то, что делает vlucas/phpdotenv</td></tr>
+<tr><td>Сборка: Container+Router+PDO+Env в index.php</td><td>8.1: предсказание потока, потом сверка</td><td>все кубики предыдущих сессий сходятся в одной точке входа</td></tr>
+<tr><td>Middleware-пайплайн через array_reduce</td><td>8.2: порядок "матрёшки" предсказан, потом проверен</td><td>тот же Pipeline, что в Laravel-лабе</td></tr>
+<tr><td>Сравнение с Laravel</td><td>8.3</td><td>разница не в алгоритме, а в объёме решённых краевых случаев</td></tr>
+</table>
+
+<h2 id="sec-15"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-15"></label>15. Глоссарий <a class="anchor" href="#sec-15">#</a></h2>
+<div class="glossary-item" id="g-0"><b>declare(strict_types=1)</b> — директива файла, отключающая неявное приведение типов при вызовах функций ИЗ ЭТОГО файла.</div>
+<div class="glossary-item" id="g-1"><b>TypeError</b> — исключение (точнее, Error) при несовпадении типа аргумента/возврата под strict_types.</div>
+<div class="glossary-item" id="g-2"><b>Copy-on-write (COW)</b> — оптимизация: массив физически копируется не при присваивании, а при первой попытке изменить одну из копий.</div>
+<div class="glossary-item" id="g-3"><b>array_filter / usort</b> — фильтрация с сохранением ключей / сортировка с мутацией и сбросом ключей.</div>
+<div class="glossary-item" id="g-4"><b>mb_* функции</b> — multibyte-безопасные аналоги строковых функций (mb_strlen, mb_substr), корректно работающие с UTF-8.</div>
+<div class="glossary-item" id="g-5"><b>Суперглобалы</b> — $_GET, $_POST, $_SERVER, $_SESSION, $_COOKIE, $_ENV — глобальные массивы данных запроса.</div>
+<div class="glossary-item" id="g-6"><b>php://input</b> — поток для чтения сырого тела HTTP-запроса; единственный способ получить JSON-тело.</div>
+<div class="glossary-item" id="g-7"><b>Throwable / Error / Exception</b> — корневой интерфейс исключений; Error — ошибки движка, Exception — ошибки приложения.</div>
+<div class="glossary-item" id="g-8"><b>set_exception_handler</b> — глобальный перехватчик непойманных исключений — последняя линия обороны.</div>
+<div class="glossary-item" id="g-9"><b>Closure / use</b> — анонимная функция; use — явный захват внешней переменной (по значению или по ссылке через &).</div>
+<div class="glossary-item" id="g-10"><b>Стрелочная функция (fn)</b> — короткий синтаксис с автоматическим захватом внешних переменных, только для одного выражения.</div>
+<div class="glossary-item" id="g-11"><b>callable</b> — псевдотип для всего, что можно вызвать: функция, замыкание, [объект, метод], [класс, метод].</div>
+<div class="glossary-item" id="g-12"><b>Generator / yield</b> — функция, приостанавливающаяся на yield и продолжающаяся при следующей итерации — ленивые вычисления.</div>
+<div class="glossary-item" id="g-13"><b>Iterator / IteratorAggregate</b> — интерфейсы, делающие объект совместимым с foreach.</div>
+<div class="glossary-item" id="g-14"><b>Магические методы</b> — __get/__set/__call/__callStatic/__invoke/__toString и др. — перехватчики операций над объектом.</div>
+<div class="glossary-item" id="g-15"><b>Фасад (через __callStatic)</b> — статический прокси к объекту из контейнера/реестра — механизм Cache::, Log:: и подобных в Laravel.</div>
+<div class="glossary-item" id="g-16"><b>match</b> — выражение-переключатель со строгим сравнением, без проваливания, обязательно исчерпывающее.</div>
+<div class="glossary-item" id="g-17"><b>Nullsafe (?->)</b> — обращение к свойству/методу, останавливающееся на null без ошибки — short-circuit по цепочке.</div>
+<div class="glossary-item" id="g-18"><b>PSR-4</b> — стандарт соответствия namespace класса и пути к файлу для автозагрузки.</div>
+<div class="glossary-item" id="g-19"><b>spl_autoload_register</b> — низкоуровневая функция регистрации автозагрузчика; основа composer-автозагрузки.</div>
+<div class="glossary-item" id="g-20"><b>PDO</b> — абстракция доступа к БД; prepared statements разделяют SQL-текст и данные, защищая от инъекций.</div>
+<div class="glossary-item" id="g-21"><b>Транзакция (beginTransaction/commit/rollBack)</b> — группа операций, применяемая целиком или не применяемая вообще.</div>
+<div class="glossary-item" id="g-22"><b>FOR UPDATE</b> — блокировка строки БД на время транзакции — защита от гонки при одновременном доступе.</div>
+<div class="glossary-item" id="g-23"><b>hash_equals</b> — сравнение строк за константное время — защита от timing-атак при сверке секретов.</div>
+<div class="glossary-item" id="g-24"><b>CSRF-токен</b> — секретное значение, привязанное к сессии, подтверждающее, что запрос пришёл с легитимной формы.</div>
+<div class="glossary-item" id="g-25"><b>DI-контейнер / autowiring</b> — реестр объектов приложения; autowiring — автоматическое разрешение зависимостей конструктора через Reflection.</div>
+<div class="glossary-item" id="g-26"><b>ReflectionClass</b> — API для интроспекции класса в рантайме: чтение конструктора, параметров, типов.</div>
+<div class="glossary-item" id="g-27"><b>Middleware pipeline</b> — цепочка обработчиков "до/после" вокруг основного действия, реализуемая вложенными замыканиями.</div>
+
+<h2 id="sec-16"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-16"></label>16. Вопросы на понимание (и для собеседования) <a class="anchor" href="#sec-16">#</a></h2>
+
+<p>Письменно, со ссылкой на шаг. Часть вопросов — прямая калька с реальных PHP-собеседований.</p>
+<h3>Типы и массивы</h3>
+<ul>
+<li>Что делает declare(strict_types=1) — глобальную настройку или атрибут файла? Чей файл важен: вызывающего или объявляющего функцию?</li>
+<li>Приведите два конкретных примера, где сравнение == в PHP 8 даёт ДРУГОЙ результат, чем в PHP 7.</li>
+<li>Что такое copy-on-write и в какой именно момент происходит физическое копирование массива?</li>
+<li>Чем array_filter отличается от array_values по поведению с ключами? Почему это важно перед json_encode?</li>
+<li>Почему strlen("Привет") не равен количеству букв? Как посчитать правильно?</li>
+</ul>
+<h3>Ошибки и функции</h3>
+<ul>
+<li>В чём разница между Error и Exception с точки зрения того, КОГДА их стоит ловить?</li>
+<li>Выполнится ли finally, если внутри try был return? А если исключение не поймано ни одним catch?</li>
+<li>Чем use ($var) отличается от use (&$var) в замыкании? Приведите пример бага, который возникает при неправильном выборе.</li>
+<li>Зачем нужны генераторы, если можно просто вернуть массив? Приведите конкретную ситуацию, где разница критична.</li>
+</ul>
+<h3>Магия и современный синтаксис</h3>
+<ul>
+<li>Как работает __callStatic и почему на нём построены фасады Laravel? Объясните на своём примере из 4.3.</li>
+<li>Чем match отличается от switch: минимум три отличия.</li>
+<li>Что делает ?-> оператор при цепочке из трёх обращений, если null оказывается в середине?</li>
+</ul>
+<h3>Инфраструктура</h3>
+<ul>
+<li>Что такое PSR-4 и как Composer находит нужный файл по имени класса?</li>
+<li>Опишите своими словами, как ваш Router превращает /orders/{id} в регулярное выражение.</li>
+<li>Как autowiring через Reflection резолвит зависимость, у которой конструктор сам имеет зависимости? Это рекурсия или что-то иное?</li>
+<li>Почему интерфейс нельзя автоматически разрешить через Reflection без явного биндинга?</li>
+<li>Как prepared statement защищает от SQL-инъекции на уровне протокола (не просто "экранирует апострофы")?</li>
+<li>Что произойдёт с частично выполненными операциями внутри транзакции при rollBack?</li>
+<li>Зачем hash_equals, если можно сравнить строки через ===?</li>
+</ul>
+<h3>Итог</h3>
+<ul>
+<li>Опишите принцип работы middleware-пайплайна через array_reduce своими словами, не подглядывая в код.</li>
+<li>Назовите три вещи, которые Laravel даёт "бесплатно" сверх того, что вы написали в этой лабе, и объясните ЦЕНУ их отсутствия в вашем коде (не просто "неудобно", а конкретный сценарий, где это сломается).</li>
+</ul>
+
+<h2 id="sec-17"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-17"></label>17. Что дальше <a class="anchor" href="#sec-17">#</a></h2>
+
+<table>
+<tr><th>Тема</th><th>Что это</th><th>Связь с лабой</th><th>Почитать</th></tr>
+<tr><td>Laravel Lab — TaskFlow</td><td>полноценный фреймворк поверх того же языка</td><td>прямое сравнение: ваш Container → Laravel Container, ваш Router → Laravel Router</td><td>Laravel_Lab_TaskFlow.html</td></tr>
+<tr><td>ООП Lab — Coffee Shop</td><td>тот же домен, глубокий фокус на ООП-принципах</td><td>если ещё не пройдена — здесь домен используется, но принципы объяснены там</td><td>OOP_Lab_CoffeeShop.html</td></tr>
+<tr><td>PSR-стандарты глубже</td><td>PSR-7 (HTTP messages), PSR-11 (Container), PSR-15 (middleware)</td><td>ваши Router/Container/Response — упрощённые версии того, что эти стандарты формализуют</td><td><a href="https://www.php-fig.org/psr/" target="_blank">php-fig.org/psr</a></td></tr>
+<tr><td>Symfony компоненты по отдельности</td><td>HttpFoundation, Routing, DependencyInjection — промышленные версии ваших кубиков</td><td>тот же принцип, что вы строили, но production-ready</td><td><a href="https://symfony.com/components" target="_blank">symfony.com/components</a></td></tr>
+<tr><td>PHPStan / Psalm</td><td>статический анализ типов для PHP</td><td>ловит то, что strict_types не может — несовместимость типов ДО запуска</td><td><a href="https://phpstan.org/" target="_blank">phpstan.org</a></td></tr>
+<tr><td>Атрибуты PHP 8 (#[Attribute])</td><td>метаданные класса/метода, читаемые через Reflection</td><td>то, как современные фреймворки (Symfony, отчасти Laravel) заменяют часть магии на явные аннотации</td><td><a href="https://www.php.net/manual/ru/language.attributes.php" target="_blank">PHP: Attributes</a></td></tr>
+<tr><td>Асинхронный PHP: Swoole, ReactPHP, Fibers</td><td>long-running процессы, событийный ввод-вывод</td><td>параллель с Node.js event loop из JS-лабы, но на PHP</td><td><a href="https://www.php.net/manual/ru/book.fiber.php" target="_blank">PHP: Fibers</a></td></tr>
+<tr><td>Миграции своими руками</td><td>версионирование схемы БД без Laravel Schema Builder</td><td>естественное продолжение сессии 7 — вы писали SQL руками, миграции формализуют это</td><td>исходники Phinx как учебный пример</td></tr>
+<tr><td>Тестирование глубже: моки, интеграционные тесты с реальной БД</td><td>PHPUnit data providers, mock objects, тесты транзакций</td><td>сессия 8 дала только основы</td><td><a href="https://docs.phpunit.de/" target="_blank">docs.phpunit.de</a></td></tr>
+</table>
+
+</main>
+</div>
+<a class="totop" href="#top">↑ Наверх</a>
+<script>
+(function () {
+  var KEY = 'php-lab-progress', NAVKEY = 'php-lab-nav';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+  var boxes = document.querySelectorAll('input.done');
+  function apply() {
+    var total = boxes.length, done = 0;
+    boxes.forEach(function (b) {
+      var k = b.dataset.key, on = !!state[k];
+      b.checked = on; if (on) done++;
+      var host = b.closest('.step') || b.closest('h2');
+      if (host) host.classList.toggle('is-done', on);
+      var nav = document.querySelector('.sidebar a[data-key="' + k + '"]');
+      if (nav) nav.classList.toggle('done', on);
+    });
+    document.getElementById('progress-fill').style.width = (total ? done / total * 100 : 0) + '%';
+    document.getElementById('progress-text').textContent = 'Пройдено: ' + done + ' / ' + total;
+  }
+  boxes.forEach(function (b) {
+    b.addEventListener('change', function () {
+      state[b.dataset.key] = b.checked;
+      localStorage.setItem(KEY, JSON.stringify(state));
+      apply();
+    });
+  });
+  document.getElementById('reset-progress').addEventListener('click', function () {
+    if (confirm('Сбросить все отметки?')) { state = {}; localStorage.removeItem(KEY); apply(); }
+  });
+  apply();
+
+  var toggle = document.getElementById('nav-toggle');
+  function setNav(collapsed) {
+    document.body.classList.toggle('nav-collapsed', collapsed);
+    localStorage.setItem(NAVKEY, collapsed ? '1' : '0');
+    toggle.textContent = collapsed ? '☰' : '✕';
+    toggle.title = collapsed ? 'Показать оглавление' : 'Скрыть оглавление';
+  }
+  toggle.addEventListener('click', function () { setNav(!document.body.classList.contains('nav-collapsed')); });
+  setNav(localStorage.getItem(NAVKEY) === '1' || window.innerWidth < 900);
+
+  // клик по чекбоксу в заголовке не должен вести по якорю
+  document.querySelectorAll('.done-label').forEach(function (l) { l.addEventListener('click', function (e) { e.stopPropagation(); }); });
+})();
+</script>
+</body>
+</html>
