@@ -218,7 +218,7 @@ echo '404 Not Found';</code></pre>
 <tr><td>Сессии/CSRF — "как получится"</td><td>уязвимости, дублирование кода проверки токена в каждой форме</td><td>сессия 7: сессии и CSRF руками</td></tr>
 <tr><td>Конфигурация — захардкожена в коде</td><td>секреты в git, невозможно сменить окружение без правки кода</td><td>сессия 7: свой .env-парсер</td></tr>
 </table>
-<div class="insight-box"><span class="tag">ГЛАВНАЯ МЫСЛЬ ЛАБЫ</span><p>Laravel — не магия, а решённые версии ровно этих пяти проблем, упакованные в классы с удобным API. Вы уже пользовались Container, Router, Eloquent как потребитель (Laravel-лаба). Здесь вы напишете упрощённые, но РАБОТАЮЩИЕ версии первых двух своими руками — не потому что в проде стоит изобретать велосипед, а потому что после этого строка <code>Route::get('/menu', [MenuController::class, 'index'])</code> перестанет быть заклинанием и станет понятным вам кодом.</p></div>
+<div class="insight-box"><span class="tag">ГЛАВНАЯ МЫСЛЬ ЛАБЫ</span><p>Laravel — не магия, а решённые версии ровно этих пяти проблем, упакованные в классы с удобным API. Вы уже пользовались Container, Router, Eloquent как потребитель (OOP-лаба, php-coffee). Здесь вы напишете упрощённые, но РАБОТАЮЩИЕ версии первых двух своими руками — не потому что в проде стоит изобретать велосипед, а потому что после этого строка <code>Route::get('/menu', [MenuController::class, 'index'])</code> перестанет быть заклинанием и станет понятным вам кодом.</p></div>
 <div class="next-box"><span class="tag">ПЕРЕД РАЗДЕЛОМ <a href="#sec-2">2</a></span><ul>
 <li>📖 Пробежаться: <a href="https://www.php.net/manual/ru/language.types.php" target="_blank">PHP: Types</a> — держать открытым как справочник.</li>
 <li>✅ Docker; ООП-лаба пройдена (принципы инкапсуляции/полиморфизма используются без повторного объяснения).</li>
@@ -427,9 +427,10 @@ $method = $_POST['_method'] ?? $method;                          // тот же 
 <pre>Throwable (интерфейс — и Error, и Exception его реализуют; try/catch (Throwable $e) ловит ОБА)
 ├── Error                              — ошибки уровня движка: то, что раньше "фатально останавливало" скрипт без возможности поймать
 │   ├── TypeError                       — несовпадение типа (сработает strict_types из раздела 2!)
+│   │   └── ArgumentCountError           — не хватает обязательных аргументов
 │   ├── ValueError                      — валидный тип, невалидное значение (напр. str_split('hello', 0))
-│   ├── ArgumentCountError               — не хватает обязательных аргументов
-│   └── DivisionByZeroError              — деление на ноль в intdiv() или через %
+│   └── ArithmeticError
+│       └── DivisionByZeroError          — деление на ноль в intdiv() или через %
 └── Exception                          — ошибки уровня приложения: то, что ВЫ бросаете намеренно
     ├── RuntimeException                 — ошибка, которую нельзя было предвидеть на этапе написания кода
     ├── LogicException                    — ошибка программиста: неверный вызов API, нарушение контракта
@@ -438,7 +439,7 @@ $method = $_POST['_method'] ?? $method;                          // тот же 
     │   └── OutOfRangeException
     └── ваши собственные: class PaymentFailed extends RuntimeException {}</pre>
 
-<p><b>Практическое правило:</b> <code>Error</code> — то, что почти всегда сигнализирует БАГ в вашем коде (опечатка в типе, обращение к несуществующему методу) — ловить его стоит только на самом верхнем уровне (global handler) для логирования, не для восстановления работы. <code>Exception</code> — то, что вы бросаете и ловите осознанно как часть бизнес-логики (недостаточно средств, неверный формат, товар закончился) — тот же принцип, что <code>Result&lt;T, E&gt;</code> в TS-лабе или доменные исключения в ООП-лабе.</p>
+<p><b>Практическое правило:</b> <code>Error</code> — то, что почти всегда сигнализирует БАГ в вашем коде (опечатка в типе, обращение к несуществующему методу) — ловить его стоит только на самом верхнем уровне (global handler) для логирования, не для восстановления работы. <code>Exception</code> — то, что вы бросаете и ловите осознанно как часть бизнес-логики (недостаточно средств, неверный формат, товар закончился) — тот же принцип, что <code>Result&lt;T, E&gt;</code>, с которым вы ещё встретитесь в TS-лабе, или доменные исключения в ООП-лабе.</p>
 
 <h3>6.2 try/catch/finally и порядок ловли</h3>
 <pre><code>&lt;?php
@@ -453,9 +454,9 @@ function chargeCard(float $amount): string
 
 try {
     echo chargeCard(-10);
-} catch (InvalidArgumentException $e) {                 // СПЕЦИФИЧНОЕ исключение — раньше, чем общее
+} catch (InvalidArgumentException $e) {                 // это НЕ предок RuntimeException — порядок catch здесь просто по смыслу, не по иерархии
     echo 'Некорректный ввод: ' . $e-&gt;getMessage();
-} catch (RuntimeException $e) {                            // общее — позже
+} catch (RuntimeException $e) {                            // отдельная ветка исключений, не наследник InvalidArgumentException
     echo 'Ошибка выполнения: ' . $e-&gt;getMessage();
 } finally {
     echo 'Логируем попытку оплаты в любом случае';        // выполнится ВСЕГДА — и при успехе, и при исключении, и даже при return внутри try
@@ -504,7 +505,7 @@ set_exception_handler(function (Throwable $e): void {          // последн
 
 // теперь даже "старая" ошибка становится исключением и ловится глобально:
 echo $undefinedVariable;    // Warning превращается в ErrorException → set_exception_handler → JSON-ответ 500</code></pre>
-<div class="why"><b>Зачем:</b> <code>set_error_handler</code> закрывает разрыв между старым стилем PHP-ошибок (warnings, notices — не Throwable, их нельзя поймать через try/catch) и современными исключениями: превращая их в <code>ErrorException</code>, вы получаете единую точку обработки. <code>set_exception_handler</code> — ровно то место, куда Laravel помещает свой <code>Handler::render()</code> из ООП-лабы и Laravel-лабы (раздел 4.3 Laravel-лабы, <code>withExceptions</code>) — просто без обёртки фреймворка, голыми руками.</div>
+<div class="why"><b>Зачем:</b> <code>set_error_handler</code> закрывает разрыв между старым стилем PHP-ошибок (warnings, notices — не Throwable, их нельзя поймать через try/catch) и современными исключениями: превращая их в <code>ErrorException</code>, вы получаете единую точку обработки. <code>set_exception_handler</code> — ровно то место, куда Laravel помещает свой <code>Handler::render()</code>, который вы видели в ООП-лабе, а конфигурацию через <code>withExceptions</code> ещё встретите в Laravel-лабе (раздел 6, теория / сессия 4, практика) — просто без обёртки фреймворка, голыми руками.</div>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите <code>finally</code> из примера 6.2 и добавьте <code>return</code> внутри блока <code>try</code> перед строкой с echo. Выполнится ли код после <code>return</code>? А если вернуть <code>finally</code> обратно?</li><li>Почему <code>set_exception_handler</code> отдаёт пользователю ОБЩЕЕ сообщение ("Внутренняя ошибка сервера"), а не <code>$e-&gt;getMessage()</code> напрямую? Приведите конкретный пример исключения, чьё сообщение было бы опасно показывать пользователю.</li></ul></div>
 
 <h2 id="sec-7"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-7"></label>7. Замыкания, callable, стрелочные функции <a class="anchor" href="#sec-7">#</a></h2>
@@ -548,7 +549,7 @@ applyToAll([1, 2, 3], function ($x) { return $x * 2; });    // 2. анонимн
 applyToAll([1, 2, 3], 'strval');                             // 3. строка с именем функции
 applyToAll($users, [$formatter, 'formatName']);              // 4. [объект, 'метод'] — вызов метода экземпляра
 applyToAll($users, [Formatter::class, 'formatStatic']);       // 4b. [класс, 'метод'] — статический метод
-applyToAll($users, $formatter-&gt;formatName(...));               // 5. first-class callable syntax (PHP 8.1) — как $obj.method(...) в TS-лабе</code></pre>
+applyToAll($users, $formatter-&gt;formatName(...));               // 5. first-class callable syntax (PHP 8.1) — как $obj.method(...), с которым вы встретитесь в TS-лабе</code></pre>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Перепишите пример со счётчиком (<code>$counter</code>) так, чтобы три вызова <code>$increment()</code> НЕ увеличивали общий <code>$counter</code>, а каждый раз начинали с нуля. Что нужно поменять — <code>use</code> или что-то ещё?</li><li>Почему first-class callable syntax <code>$formatter-&gt;formatName(...)</code> (форма 5) предпочтительнее формы <code>[$formatter, 'formatName']</code> (форма 4) в современном коде? Подсказка: что проверяет IDE и статический анализатор в каждом случае.</li></ul></div>
 
 <h2 id="sec-8"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-8"></label>8. Генераторы, Iterator, ленивые вычисления <a class="anchor" href="#sec-8">#</a></h2>
@@ -615,7 +616,7 @@ echo count($collection);                                                  // р�
 <p>Каждый раз, когда в Laravel «просто работает» что-то похожее на магию — <code>$request-&gt;user</code> без метода <code>user()</code>, <code>Cache::get()</code> без объекта, <code>Model::where(...)</code> с несуществующим методом — под капотом один из методов ниже. Это раздел, после которого фасады и Eloquent перестают быть загадкой.</p>
 <table>
 <tr><th>Метод</th><th>Срабатывает когда</th><th>Где используется в Laravel</th></tr>
-<tr><td><code>__construct</code> / <code>__destruct</code></td><td>создание / уничтожение объекта</td><td>DI-контейнер вызывает __construct с резолвленными зависимостями (Laravel-лаба, раздел 5)</td></tr>
+<tr><td><code>__construct</code> / <code>__destruct</code></td><td>создание / уничтожение объекта</td><td>DI-контейнер вызывает __construct с резолвленными зависимостями (видели как потребители в OOP-лабе, php-coffee)</td></tr>
 <tr><td><code>__get($name)</code> / <code>__set($name, $value)</code></td><td>обращение к НЕСУЩЕСТВУЮЩЕМУ/недоступному свойству</td><td>Eloquent: <code>$model-&gt;title</code> — свойства title физически нет, __get достаёт из <code>$attributes</code></td></tr>
 <tr><td><code>__isset</code> / <code>__unset</code></td><td><code>isset($obj-&gt;x)</code> / <code>unset($obj-&gt;x)</code> для недоступного свойства</td><td>Eloquent: проверка наличия атрибута</td></tr>
 <tr><td><code>__call($name, $args)</code></td><td>вызов НЕСУЩЕСТВУЮЩЕГО метода экземпляра</td><td>Eloquent: <code>$query-&gt;whereStatus(...)</code> — динамические where-методы; делегирование в Builder</td></tr>
@@ -682,7 +683,7 @@ $query-&gt;whereStatus('open')-&gt;whereTitle('Латте');       // ни where
 // __callStatic — механизм ВСЕХ фасадов Laravel:
 final class Cache
 {
-    private static ?ArrayAccess $resolvedInstance = null;
+    private static ?object $resolvedInstance = null;
 
     public static function __callStatic(string $name, array $args): mixed
     {
@@ -691,7 +692,7 @@ final class Cache
     }
 }
 Cache::get('key');       // Cache::get физически не существует — это __callStatic → $resolvedInstance-&gt;get('key')</code></pre>
-<div class="why"><b>Зачем:</b> Это буквально то, что происходит внутри <code>Illuminate\Support\Facades\Facade</code> — упрощено до сути. <code>getFacadeAccessor()</code> у реального фасада возвращает строку типа <code>'cache'</code>, которую <code>app()</code> резолвит из контейнера (Laravel-лаба, раздел 5), а <code>__callStatic</code> перенаправляет вызов на реальный объект. Теперь, увидев <code>Cache::remember(...)</code>, вы знаете: это не «специальная синтаксическая конструкция», это ровно тот код, что вы только что написали, только в вендоре.</div>
+<div class="why"><b>Зачем:</b> Это буквально то, что происходит внутри <code>Illuminate\Support\Facades\Facade</code> — упрощено до сути. <code>getFacadeAccessor()</code> у реального фасада возвращает строку типа <code>'cache'</code>, которую <code>app()</code> резолвит из контейнера (видели как потребители в OOP-лабе, php-coffee), а <code>__callStatic</code> перенаправляет вызов на реальный объект. Теперь, увидев <code>Cache::remember(...)</code>, вы знаете: это не «специальная синтаксическая конструкция», это ровно тот код, что вы только что написали, только в вендоре.</div>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Реализуйте <code>__unset</code> для класса <code>Model</code> из 9.1, удаляющий ключ из <code>$attributes</code>. Проверьте через <code>unset($drink-&gt;title)</code>.</li><li>Что произойдёт при вызове <code>$query-&gt;whereStatus()</code> БЕЗ аргумента (<code>$args[0]</code> не существует)? Как защититься?</li></ul></div>
 
 <h2 id="sec-10"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-10"></label>10. match, null-safe, null coalescing <a class="anchor" href="#sec-10">#</a></h2>
@@ -838,7 +839,7 @@ $drink = new App\Domain\Drink('Латте', 250);      // класс НИКОГ�
 <tr><td>3</td><td>Суперглобалы и обработка ошибок</td><td>свой JSON-запрос без фреймворка; глобальный exception handler</td></tr>
 <tr><td>4</td><td>Замыкания, генераторы, магия, современный синтаксис</td><td>свой мини-фасад через __callStatic; генератор для больших данных</td></tr>
 <tr><td>5</td><td>Composer + свой роутер</td><td>PSR-4 автозагрузка + маршрутизация с параметрами пути</td></tr>
-<tr><td>6</td><td>Свой DI-контейнер</td><td>autowiring через Reflection — то, что видели как потребители в Laravel-лабе</td></tr>
+<tr><td>6</td><td>Свой DI-контейнер</td><td>autowiring через Reflection — то, что видели как потребители в OOP-лабе (php-coffee)</td></tr>
 <tr><td>7</td><td>PDO, сессии, CSRF, .env</td><td>prepared statements, транзакция, свой CSRF-токен, свой .env-парсер</td></tr>
 <tr><td>8</td><td>Финал: REST API + сравнение с Laravel</td><td>рабочий API на кофейне, middleware-цепочка, таблица «что Laravel даёт бесплатно»</td></tr>
 </table>
@@ -920,13 +921,13 @@ bool(true)
 bool(false)
 
 Поймано: addQtyStrict(): Argument #1 ($a) must be of type int, string given, called in ...</pre></div>
-<div class="why"><b>Зачем:</b> Первый файл без <code>strict_types</code> тихо принимает <code>'2'</code> как <code>int</code> — удобно, но означает, что опечатка (передали строку вместо числа) не будет замечена интерпретатором никогда, только в рантайме, если разница в поведении вообще проявится. Второй файл с <code>strict_types=1</code> ловит это немедленно как <code>TypeError</code> — тот же принцип «строгость ловит ошибки на границе», что <code>strict</code> в TS-лабе и <code>preventLazyLoading</code> в Laravel-лабе.</div>
+<div class="why"><b>Зачем:</b> Первый файл без <code>strict_types</code> тихо принимает <code>'2'</code> как <code>int</code> — удобно, но означает, что опечатка (передали строку вместо числа) не будет замечена интерпретатором никогда, только в рантайме, если разница в поведении вообще проявится. Второй файл с <code>strict_types=1</code> ловит это немедленно как <code>TypeError</code> — тот же принцип «строгость ловит ошибки на границе», что <code>strict</code>, с которым вы встретитесь в TS-лабе, и <code>preventLazyLoading</code>, который вы встретите в Laravel-лабе (TaskFlow).</div>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите <code>declare(strict_types=1)</code> из второго файла и запустите снова. Изменится ли поведение <code>addQtyStrict('2', 3)</code>?</li><li>Создайте третий файл БЕЗ <code>declare</code> вообще (ни 0, ни 1) и вызовите оттуда функцию <code>addQtyStrict</code>, объявленную в файле СО strict_types. Какое поведение победит — вызывающего файла или объявляющего? Вспомните правило из раздела 2.1.</li></ul></div>
 </div></div>
 <div class="next-box"><span class="tag">ИТОГ СЕССИИ 1 → ПЕРЕД СЕССИЕЙ 2</span><ul>
 <li>✅ <code>git add -A && git commit -m "session 1: stand and types"</code></li>
 <li>📝 Ответы 1.1–1.2 в <span class="file">docs/php-notes.md</span>.</li>
-<li>📖 Почитать: <a href="https://www.php.net/manual/ru/language.references.php" target="_blank">PHP: References Explained</a> — сессия 2 целиком про массивы и copy-on-write.</li>
+<li>📖 Почитать: <a href="https://www.php.net/manual/ru/language.references.php" target="_blank">PHP: References Explained</a> — пригодится в сессии 2 для части про массивы и copy-on-write (шаги 2.1–2.2; шаг 2.3 — про mb_*/sprintf/регулярки).</li>
 </ul></div>
 <div class="session-banner" id="session-2">Сессия <a href="#session-2" style="color:#fff;text-decoration:none">2</a> — Массивы (copy-on-write) и строки <span>~2,5 часа</span></div>
 <div class="step" id="step-2-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-2-1"></label><span class="num">Шаг 2.1</span>Copy-on-write вживую: измеряем момент физического копирования<a class="anchor" href="#step-2-1">#</a></span><div class="step-body">
@@ -1043,7 +1044,7 @@ mb_strtoupper: ЛАТТЕ МАККИАТО
 <div class="next-box"><span class="tag">ИТОГ СЕССИИ 2 → ПЕРЕД СЕССИЕЙ 3</span><ul>
 <li>✅ <code>git commit -am "session 2: arrays and strings"</code></li>
 <li>📝 Ответы 2.1–2.3.</li>
-<li>📖 Почитать: <a href="https://www.php.net/manual/ru/language.exceptions.php" target="_blank">PHP: Exceptions</a> — сессия 3 целиком про обработку ошибок.</li>
+<li>📖 Почитать: <a href="https://www.php.net/manual/ru/language.exceptions.php" target="_blank">PHP: Exceptions</a> — пригодится в сессии 3, но только в шаге 3.3: остальная часть сессии (3.1–3.2) — про суперглобалы.</li>
 </ul></div>
 <div class="session-banner" id="session-3">Сессия <a href="#session-3" style="color:#fff;text-decoration:none">3</a> — Суперглобалы и обработка ошибок <span>~2,5 часа</span></div>
 <div class="step" id="step-3-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-3-1"></label><span class="num">Шаг 3.1</span>Предскажи → проверь: $_GET и приведение типов на границе с HTTP<a class="anchor" href="#step-3-1">#</a></span><div class="step-body">
@@ -1465,9 +1466,9 @@ curl -s "localhost:8000/orders/5?debug=1"     # а с query-строкой?</cod
 <div class="next-box"><span class="tag">ИТОГ СЕССИИ 5 → ПЕРЕД СЕССИЕЙ 6</span><ul>
 <li>✅ <code>git commit -am "session 5: composer psr-4, own router"</code></li>
 <li>📝 Ответы 5.1–5.2.</li>
-<li>📖 Почитать: <a href="https://www.php.net/manual/ru/book.reflection.php" target="_blank">PHP: Reflection</a> — сессия 6 целиком на нём.</li>
+<li>📖 Почитать: <a href="https://www.php.net/manual/ru/book.reflection.php" target="_blank">PHP: Reflection</a> — пригодится только в шаге 6.3: шаги 6.1–6.2 — ручное связывание и явные фабрики, без Reflection.</li>
 </ul></div>
-<div class="session-banner" id="session-6">Сессия <a href="#session-6" style="color:#fff;text-decoration:none">6</a> — Свой DI-контейнер: то, что видели как потребители в Laravel-лабе <span>~3,5 часа</span></div>
+<div class="session-banner" id="session-6">Сессия <a href="#session-6" style="color:#fff;text-decoration:none">6</a> — Свой DI-контейнер: то, что видели как потребители в OOP-лабе (php-coffee) <span>~3,5 часа</span></div>
 <div class="step" id="step-6-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-6-1"></label><span class="num">Шаг 6.1</span>Боль без контейнера: ручное связывание трёх зависимых сервисов<a class="anchor" href="#step-6-1">#</a></span><div class="step-body">
 <p>Сначала — боль без контейнера. Три сервиса с зависимостями, собираемые руками, вложенно.</p><pre><code>&lt;?php
 declare(strict_types=1);
@@ -1574,9 +1575,9 @@ final class Container
     private array $bindings = [];
     private array $instances = [];
 
-    public function bind(string $abstract, string|callable $concrete): void { $this-&gt;bindings[$abstract] = $concrete; }
+    public function bind(string $abstract, string|\Closure $concrete): void { $this-&gt;bindings[$abstract] = $concrete; }
 
-    public function singleton(string $abstract, string|callable $concrete): void
+    public function singleton(string $abstract, string|\Closure $concrete): void
     {
         $this-&gt;bind($abstract, function (Container $c) use ($abstract, $concrete) {
             return $this-&gt;instances[$abstract] ??= $this-&gt;build($concrete, $c);
@@ -1592,9 +1593,9 @@ final class Container
         return $this-&gt;build($name, $this);                          // НЕТ явного биндинга? Пробуем построить через Reflection напрямую
     }
 
-    private function build(string|callable $concrete, Container $c): mixed
+    private function build(string|\Closure $concrete, Container $c): mixed
     {
-        if (is_callable($concrete) &amp;&amp; !is_string($concrete)) return $concrete($c);
+        if ($concrete instanceof \Closure) return $concrete($c);
 
         $reflection = new \ReflectionClass($concrete);
         if (!$reflection-&gt;isInstantiable()) {
@@ -1639,19 +1640,19 @@ var_dump($repoA === $container-&gt;make(OrderRepository::class));   // true — 
 <pre><code>docker compose exec app php src/14_container_v2.php</code></pre>
 <div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>залогировано
 bool(true)</pre></div>
-<div class="why"><b>Зачем:</b> Единственный биндинг во всём файле — для интерфейса <code>OrderRepository</code>, потому что Reflection физически не может «угадать», какую из возможных реализаций интерфейса вы хотите (в этом суть интерфейса — их может быть много). <code>OrderLogger</code> и <code>OrderService</code> собраны АВТОМАТИЧЕСКИ: контейнер прочитал их конструкторы через <code>ReflectionClass</code>, увидел типы параметров, рекурсивно резолвил каждый (для <code>OrderService</code> это означало сначала построить <code>OrderLogger</code>, который сам зависит от <code>OrderRepository</code>) — ровно то же самое поведение, которое вы наблюдали КАК ПОТРЕБИТЕЛЬ в Laravel-лабе (раздел 5.1 Laravel-лабы: «контроллер получает зависимость» — теперь вы видите механизм изнутри).</div>
+<div class="why"><b>Зачем:</b> Единственный биндинг во всём файле — для интерфейса <code>OrderRepository</code>, потому что Reflection физически не может «угадать», какую из возможных реализаций интерфейса вы хотите (в этом суть интерфейса — их может быть много). <code>OrderLogger</code> и <code>OrderService</code> собраны АВТОМАТИЧЕСКИ: контейнер прочитал их конструкторы через <code>ReflectionClass</code>, увидел типы параметров, рекурсивно резолвил каждый (для <code>OrderService</code> это означало сначала построить <code>OrderLogger</code>, который сам зависит от <code>OrderRepository</code>) — ровно то же самое поведение, которое вы наблюдали КАК ПОТРЕБИТЕЛЬ в OOP-лабе (php-coffee) — «контроллер получает зависимость» — теперь вы видите механизм изнутри.</div>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Уберите единственный биндинг (<code>$container-&gt;singleton(OrderRepository::class, ...)</code>) и попробуйте <code>$container-&gt;make(OrderService::class)</code>. Прочитайте ТОЧНОЕ сообщение об исключении — на каком именно классе оно возникло (OrderService? OrderLogger? OrderRepository?) и почему именно на нём, а не раньше?</li><li>Добавьте в <code>OrderLogger</code> дополнительный конструкторный параметр <code>string $prefix = '[LOG]'</code> (скалярный, с дефолтом). Резолвится ли он автоматически? А если убрать дефолт — какое исключение бросит контейнер?</li></ul></div>
 </div></div>
 <div class="next-box"><span class="tag">ИТОГ СЕССИИ 6 → ПЕРЕД СЕССИЕЙ 7</span><ul>
 <li>✅ <code>git commit -am "session 6: own di container with reflection autowiring"</code></li>
-<li>📝 Ответы 6.1–6.3. Сравните свой Container.php с тем, что видели в Laravel-лабе, раздел 3 (Container и провайдеры) — найдите общие идеи.</li>
+<li>📝 Ответы 6.1–6.3. Сравните свой Container.php с тем, что видели как потребители в OOP-лабе (php-coffee) — найдите общие идеи.</li>
 <li>📖 Почитать: <a href="https://www.php.net/manual/ru/book.pdo.php" target="_blank">PHP: PDO</a>, <a href="https://www.php.net/manual/ru/function.session-start.php" target="_blank">session_start()</a>.</li>
 </ul></div>
 <div class="session-banner" id="session-7">Сессия <a href="#session-7" style="color:#fff;text-decoration:none">7</a> — PDO, сессии, CSRF, .env <span>~3,5 часа</span></div>
 <div class="step" id="step-7-1"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-7-1"></label><span class="num">Шаг 7.1</span>SQL-инъекция: найти уязвимость чтением, потом исправить prepared statement<a class="anchor" href="#step-7-1">#</a></span><div class="step-body">
 <p>Сначала — уязвимость. Читаем код, находим проблему ДО объяснения.</p><pre><code>&lt;?php
 declare(strict_types=1);
-// src/15_pdo_vulnerable.php — НАЙДИТЕ уязвимость, прежде чем читать "под капотом"
+// public/pdo-vulnerable.php — НАЙДИТЕ уязвимость, прежде чем читать "под капотом"
 
 $pdo = new PDO('pgsql:host=postgres;dbname=coffee', 'coffee', 'coffee');
 
@@ -1664,10 +1665,10 @@ declare(strict_types=1);
 // CREATE TABLE drinks (id SERIAL PRIMARY KEY, name TEXT, price INT);
 // INSERT INTO drinks (name, price) VALUES ('Эспрессо', 150), ('Латте', 250);
 
-// src/16_pdo_safe.php — ИСПРАВЛЕНО: prepared statement
+// public/pdo-safe.php — ИСПРАВЛЕНО: prepared statement
 
 $pdo = new PDO('pgsql:host=postgres;dbname=coffee', 'coffee', 'coffee', [
-    PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION,               // без этого PDO молча игнорирует ошибки SQL!
+    PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION,               // с PHP 8.0 это и так поведение по умолчанию, опция здесь для явности
 ]);
 
 $name = $_GET['name'] ?? '';
@@ -1685,7 +1686,7 @@ curl -s "localhost:8000/pdo-safe.php?name=x%27%20OR%20%271%27=%271"             
 <div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre># уязвимая версия с обычным запросом: [{"id":2,"name":"Латте","price":250}]
 # уязвимая версия с инъекцией: [{"id":1,...}, {"id":2,...}]     ← ВСЕ строки таблицы! Условие превратилось в "OR 1=1" — всегда истинно
 # безопасная версия с тем же payload: []                          ← ищет напиток БУКВАЛЬНО с таким именем (его нет), инъекция не сработала</pre></div>
-<div class="why"><b>Зачем:</b> <code>prepare()</code> отправляет SQL-ШАБЛОН и значения параметров РАЗДЕЛЬНО — драйвер PostgreSQL получает переданное значение не как код SQL, а как ОДНО СТРОКОВОЕ значение для сравнения с колонкой <code>name</code>, буквально, апостроф и всё остальное как есть. Конкатенация в первом файле, напротив, вставляет пользовательский ввод ПРЯМО В ТЕКСТ SQL-запроса — апостроф внутри ввода «закрывает» строковый литерал раньше, чем задумано, и остаток становится исполняемым SQL-кодом. <code>PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION</code> — без него синтаксическая ошибка в SQL (например, от той же инъекции с опечаткой) молча возвращает <code>false</code> вместо исключения, и баг остаётся незамеченным.</div>
+<div class="why"><b>Зачем:</b> <code>prepare()</code> отправляет SQL-ШАБЛОН и значения параметров РАЗДЕЛЬНО — драйвер PostgreSQL получает переданное значение не как код SQL, а как ОДНО СТРОКОВОЕ значение для сравнения с колонкой <code>name</code>, буквально, апостроф и всё остальное как есть. Конкатенация в первом файле, напротив, вставляет пользовательский ввод ПРЯМО В ТЕКСТ SQL-запроса — апостроф внутри ввода «закрывает» строковый литерал раньше, чем задумано, и остаток становится исполняемым SQL-кодом. <code>PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION</code> — это уже поведение по умолчанию начиная с PHP 8.0 (RFC «Saner PDO error mode default»), опция здесь для явности, а не потому что без неё ошибки SQL молча проглатываются.</div>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Попробуйте инъекцию <code>?name=x%27%3B%20DROP%20TABLE%20drinks%3B%20--</code> на ОБЕИХ версиях (сначала на тестовой БД!). На уязвимой версии — сработает ли DROP TABLE через <code>query()</code> с несколькими выражениями? (Подсказка: зависит от того, разрешает ли драйвер multi-statement; сам факт, что это вообще ОБСУЖДАЕТСЯ как риск, — уже причина никогда так не писать.)</li><li>Что произойдёт на безопасной версии с тем же payload? Объясните разницу.</li></ul></div>
 </div></div>
 <div class="step" id="step-7-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-7-2"></label><span class="num">Шаг 7.2</span>Транзакция: предсказать поведение rollBack после частично выполненных операций<a class="anchor" href="#step-7-2">#</a></span><div class="step-body">
@@ -1743,13 +1744,13 @@ final class Csrf
 {
     public static function token(): string
     {
-        session_start();                                        // идемпотентно — если сессия уже стартовала, ничего не сломает
+        if (session_status() === PHP_SESSION_NONE) session_start();   // повторный вызов без проверки бросил бы предупреждение в вывод
         return $_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));   // сгенерировать ОДИН раз на сессию, переиспользовать
     }
 
     public static function verify(?string $submitted): bool
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) session_start();
         $expected = $_SESSION['csrf_token'] ?? null;
         return $expected !== null &amp;&amp; $submitted !== null &amp;&amp; hash_equals($expected, $submitted);   // hash_equals — защита от timing-атак
     }
@@ -1777,7 +1778,7 @@ use App\Support\Csrf;
 header('Content-Type: application/json; charset=utf-8');
 
 if (!Csrf::verify($_POST['_csrf'] ?? null)) {
-    http_response_code(419);                                    // тот же код, что использует Laravel (Laravel-лаба, раздел 6.1 — Sanctum SPA CSRF)
+    http_response_code(419);                                    // тот же код, что использует Laravel — встретите в Laravel-лабе (раздел 7, теория / сессия 6, практика — Sanctum SPA CSRF)
     echo json_encode(['error' =&gt; 'Токен CSRF недействителен или отсутствует']);
     exit;
 }
@@ -1786,7 +1787,7 @@ echo json_encode(['order' =&gt; $_POST['drink'] ?? null, 'status' =&gt; 'соз�
 curl -s -X POST localhost:8000/order-submit.php -d "drink=Латте&amp;_csrf=ПОДДЕЛЬНЫЙ"          # неверный токен
 curl -s -X POST localhost:8000/order-submit.php -d "drink=Латте"                            # токен вообще отсутствует</code></pre>
 <div class="fix-box"><span class="tag">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</span><pre>{"error":"Токен CSRF недействителен или отсутствует"}
-{"error":"Токен CSRF недействителен или отсутствует"}</pre><p>Оба запроса без корректного токена отклонены с кодом 419 — тем же, что вы видели в Laravel-лабе при провале Sanctum CSRF-проверки. Чтобы пройти проверку успешно, нужна РЕАЛЬНАЯ сессия: сначала GET на <code>/order-form.php</code> с сохранением cookie (<code>curl -c cookies.txt</code>), потом POST с этим же cookie и токеном, вычитанным из HTML формы.</p></div>
+{"error":"Токен CSRF недействителен или отсутствует"}</pre><p>Оба запроса без корректного токена отклонены с кодом 419 — тем же, с которым вы столкнётесь в Laravel-лабе при провале Sanctum CSRF-проверки. Чтобы пройти проверку успешно, нужна РЕАЛЬНАЯ сессия: сначала GET на <code>/order-form.php</code> с сохранением cookie (<code>curl -c cookies.txt</code>), потом POST с этим же cookie и токеном, вычитанным из HTML формы.</p></div>
 <div class="why"><b>Зачем:</b> <code>hash_equals()</code> сравнивает строки за КОНСТАНТНОЕ время независимо от того, на каком символе они разошлись — обычный <code>===</code> для строк останавливается на первом несовпадающем байте, и разница во времени выполнения (доли микросекунд) теоретически позволяет атакующему подбирать токен побайтово, измеряя задержку ответа сервера (timing attack). На практике для CSRF-токена это менее критично, чем для сравнения паролей/подписей, но <code>hash_equals</code> — правильная привычка для ЛЮБОГО сравнения секретных значений.</div>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Выполните полный цикл через <code>curl -c cookies.txt -b cookies.txt</code>: сначала GET формы с сохранением cookie, вытащите токен, потом POST с тем же cookie и правильным токеном. Добейтесь ответа <code>{"order":"Латте","status":"создан"}</code>.</li><li>Что произойдёт, если открыть форму в ОДНОЙ сессии (одном browser/curl -c), а отправить форму с cookie от ДРУГОЙ сессии? Проверьте — должно провалиться, и объясните, какую атаку это предотвращает (подсказка: название самой уязвимости — Cross-Site Request Forgery).</li></ul></div>
 </div></div>
@@ -1908,7 +1909,10 @@ final class MenuController
     }
 }
 
+&lt;?php
+declare(strict_types=1);
 // src/Controllers/OrderController.php
+
 namespace App\Controllers;
 
 final class OrderController
@@ -1996,7 +2000,7 @@ curl -s localhost:8000/orders | jq</code></pre>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Добавьте маршрут <code>DELETE /orders/{id}</code>. Понадобится ли менять <code>Router</code> — вспомните, поддерживает ли он метод <code>delete()</code>, и если нет, добавьте его по аналогии с <code>get</code>/<code>post</code>.</li><li>Что произойдёт при одновременных двух запросах <code>POST /orders</code> на последнюю единицу товара (представьте, что в <code>drinks</code> есть колонка <code>stock</code>, которую нужно проверять и уменьшать)? Как <code>FOR UPDATE</code> из сессии 7 защитил бы от продажи товара дважды — опишите словами, не пишите код.</li></ul></div>
 </div></div>
 <div class="step" id="step-8-2"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-8-2"></label><span class="num">Шаг 8.2</span>Middleware-цепочка через array_reduce: предсказать порядок "матрёшки", потом проверить<a class="anchor" href="#step-8-2">#</a></span><div class="step-body">
-<p>Middleware-цепочка своими руками — та же идея Decorator, что в Laravel-лабе (раздел 6 Laravel-лабы), но собранная руками из массива callable.</p><pre><code>&lt;?php
+<p>Middleware-цепочка своими руками — та же идея Decorator, что в OOP-лабе (php-coffee), но собранная руками из массива callable.</p><pre><code>&lt;?php
 declare(strict_types=1);
 // src/Http/Router.php — ДОБАВИТЬ поддержку middleware
 
@@ -2051,7 +2055,7 @@ B: до
 H: обработчик
 B: после
 A: после</pre><p>Порядок «матрёшкой»: A регистрировался ПЕРВЫМ, поэтому оборачивает всё остальное СНАРУЖИ — его код «до» выполняется первым, а код «после» — последним. Если ваше предсказание совпало — вы правильно поняли механизм вложенных замыканий; если нет, перечитайте <code>array_reduce</code> с <code>array_reverse</code> ещё раз, посимвольно проследив, что происходит на каждой итерации.</p></div>
-<div class="why"><b>Зачем:</b> <code>array_reduce</code> с <code>array_reverse</code> строит цепочку замыканий ИЗНУТРИ НАРУЖУ: начинаем с <code>handler</code> как самого внутреннего слоя, оборачиваем его в <code>middlewareB</code> (последний в исходном порядке — обрабатывается первым при reverse), затем результат оборачиваем в <code>middlewareA</code>. Итоговый <code>$pipeline</code> — это <code>middlewareA</code>, внутри которого при вызове <code>$next()</code> находится <code>middlewareB</code>, внутри которого — сам <code>handler</code>. Это ТОЧНО тот же паттерн Pipeline, что использует Laravel для HTTP-middleware (Laravel-лаба, раздел 6.1: <code>Pipeline::through([...])-&gt;then(...)</code>) — вы только что построили его упрощённую версию руками.</div>
+<div class="why"><b>Зачем:</b> <code>array_reduce</code> с <code>array_reverse</code> строит цепочку замыканий ИЗНУТРИ НАРУЖУ: начинаем с <code>handler</code> как самого внутреннего слоя, оборачиваем его в <code>middlewareB</code> (последний в исходном порядке — обрабатывается первым при reverse), затем результат оборачиваем в <code>middlewareA</code>. Итоговый <code>$pipeline</code> — это <code>middlewareA</code>, внутри которого при вызове <code>$next()</code> находится <code>middlewareB</code>, внутри которого — сам <code>handler</code>. Это ТОЧНО тот же паттерн Pipeline, что использует Laravel для HTTP-middleware (встретите в Laravel-лабе, раздел 6, теория / сессия 4, практика: <code>Pipeline::through([...])-&gt;then(...)</code>) — вы только что построили его упрощённую версию руками.</div>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Поменяйте местами регистрацию: <code>['middlewareB', 'middlewareA']</code> вместо <code>['middlewareA', 'middlewareB']</code>. Предскажите НОВЫЙ порядок вывода, затем проверьте.</li><li>Добавьте третье middleware C, которое НЕ вызывает <code>$next($params)</code> вообще (например, потому что хочет прервать цепочку — как middleware авторизации в Laravel-лабе, отклоняющий запрос до контроллера). Что произойдёт с H и с middleware, зарегистрированными ПОСЛЕ C?</li></ul></div>
 </div></div>
 <div class="step" id="step-8-3"><span class="step-head"><label class="done-label" title="Отметить шаг пройденным"><input type="checkbox" class="done" data-key="step-8-3"></label><span class="num">Шаг 8.3</span>Тесты PHPUnit + финальная таблица «что Laravel даёт бесплатно»<a class="anchor" href="#step-8-3">#</a></span><div class="step-body">
@@ -2084,7 +2088,11 @@ final class RouterTest extends TestCase
     }
 }
 
+&lt;?php
+declare(strict_types=1);
 // tests/ContainerTest.php
+
+use PHPUnit\Framework\TestCase;
 use App\Container\Container;
 
 final class ContainerTest extends TestCase
@@ -2120,7 +2128,7 @@ OK (4 tests, 5 assertions)</pre></div>
 └── Controllers/         MenuController, OrderController — тонкие, вся инфраструктура снаружи</pre>
 <table>
 <tr><th>Что делает Laravel</th><th>Что вы написали руками</th><th>Строк</th><th>Чего не хватает вашей версии</th></tr>
-<tr><td>Service Container</td><td>Container.php: ReflectionClass autowiring</td><td>~40</td><td>contextual binding, deferred providers, теги, resolving-хуки (Laravel-лаба, раздел 5.3)</td></tr>
+<tr><td>Service Container</td><td>Container.php: ReflectionClass autowiring</td><td>~40</td><td>contextual binding, deferred providers, теги, resolving-хуки (Laravel-лаба, раздел 3, теория / сессия 5, практика)</td></tr>
 <tr><td>Router + Route::apiResource</td><td>Router.php: regex-параметры + пайплайн</td><td>~35</td><td>именованные маршруты, группы с общим префиксом/middleware, route model binding, кэширование скомпилированных маршрутов</td></tr>
 <tr><td>Eloquent ORM</td><td>голый PDO с prepared statements</td><td>0 (сознательно)</td><td>ВСЁ: связи, casts, события модели, миграции, query builder — вся Laravel-лаба, раздел 4, посвящена этому</td></tr>
 <tr><td>Middleware pipeline</td><td>array_reduce + array_reverse</td><td>~10</td><td>параметры middleware (<code>role:admin</code>), terminable middleware, приоритет групп</td></tr>
@@ -2129,7 +2137,7 @@ OK (4 tests, 5 assertions)</pre></div>
 <tr><td>Facades (Cache::, Log::)</td><td>__callStatic пример из 4.3</td><td>~10</td><td>полноценный реестр фасадов, alias-резолюция, тестируемость через <code>::fake()</code></td></tr>
 <tr><td>Artisan (make:controller и т.д.)</td><td>нет — файлы создаются руками</td><td>0</td><td>генерация шаблонного кода, миграции, seeders — вся экосистема консольных команд</td></tr>
 </table>
-<div class="why"><b>Зачем:</b> Разница не в том, что Laravel «умнее вас» — вы только что написали работающий Container с настоящим autowiring через Reflection, работающий Router с параметрами и middleware, безопасный слой работы с БД. Разница — в объёме РЕШЁННЫХ КРАЕВЫХ СЛУЧАЕВ и в экосистеме вокруг: 40 строк вашего Container не поддерживают contextual binding, который понадобится в проекте с двумя реализациями одного интерфейса для разных потребителей (Laravel-лаба, раздел 5.3); 35 строк вашего Router не умеют именованные маршруты, без которых при рефакторинге путей придётся руками искать все места, где путь захардкожен строкой. Теперь, открывая исходники <code>vendor/laravel/framework</code>, вы увидите не «магию», а более полную версию того, что уже написали сами.</div>
+<div class="why"><b>Зачем:</b> Разница не в том, что Laravel «умнее вас» — вы только что написали работающий Container с настоящим autowiring через Reflection, работающий Router с параметрами и middleware, безопасный слой работы с БД. Разница — в объёме РЕШЁННЫХ КРАЕВЫХ СЛУЧАЕВ и в экосистеме вокруг: 40 строк вашего Container не поддерживают contextual binding, который понадобится в проекте с двумя реализациями одного интерфейса для разных потребителей (Laravel-лаба, раздел 3, теория / сессия 5, практика); 35 строк вашего Router не умеют именованные маршруты, без которых при рефакторинге путей придётся руками искать все места, где путь захардкожен строкой. Теперь, открывая исходники <code>vendor/laravel/framework</code>, вы увидите не «магию», а более полную версию того, что уже написали сами.</div>
 <div class="note-box"><span class="tag">ПРОВЕРЬ СЕБЯ</span><ul><li>Пройдите по всем восьми сессиям и для каждой назовите одну концепцию, которая до этой лабы казалась «магией» Laravel, а теперь понятна как код, который вы сами написали или могли бы написать.</li><li>Сравните эту таблицу с аналогичной таблицей «vanilla vs Vue» из JS-лабы (раздел 8.4 JS-лабы). Какой общий паттерн виден в ОБЕИХ таблицах — что именно фреймворки почти всегда добавляют сверх «рабочего ядра», которое вы написали руками?</li></ul></div>
 </div></div>
 <div class="next-box"><span class="tag">ИТОГ СЕССИИ 8</span><ul>
@@ -2154,19 +2162,19 @@ OK (4 tests, 5 assertions)</pre></div>
 <tr><td>match, nullsafe ?->, ??</td><td>4.4: неполные данные заказа Order→Customer→Address</td><td>short-circuit останавливается на первом null</td></tr>
 <tr><td>Composer PSR-4 автозагрузка</td><td>5.1: с автозагрузкой и без, бок о бок</td><td>один require вместо десятков</td></tr>
 <tr><td>Свой роутер: v1 наивный → v2 с параметрами</td><td>5.2: версия 1 намеренно ломается, версия 2 чинит</td><td>regex-параметры — не магия, а preg_replace_callback</td></tr>
-<tr><td>Свой DI-контейнер: v1 фабрики → v2 autowiring</td><td>6.1-6.3: боль → service locator → Reflection</td><td>то, что Laravel Container делает под капотом (Laravel-лаба, раздел 5)</td></tr>
+<tr><td>Свой DI-контейнер: v1 фабрики → v2 autowiring</td><td>6.1-6.3: боль → service locator → Reflection</td><td>то, что Laravel Container делает под капотом (Laravel-лаба, раздел 3, теория / сессия 5, практика)</td></tr>
 <tr><td>PDO prepared statements vs SQL-инъекция</td><td>7.1: уязвимость найдена чтением, потом исправлена</td><td>параметры отправляются отдельно от SQL-текста</td></tr>
 <tr><td>Транзакции: commit/rollBack, FOR UPDATE</td><td>7.2: предсказание поведения rollBack, потом проверка</td><td>всё или ничего, независимо от того, где случился сбой</td></tr>
 <tr><td>CSRF: сессия + hash_equals</td><td>7.3: форма без защиты → с токеном</td><td>то, что даёт @csrf в Blade</td></tr>
 <tr><td>Свой .env-парсер</td><td>7.4: строка "true" ≠ булево true</td><td>то, что делает vlucas/phpdotenv</td></tr>
 <tr><td>Сборка: Container+Router+PDO+Env в index.php</td><td>8.1: предсказание потока, потом сверка</td><td>все кубики предыдущих сессий сходятся в одной точке входа</td></tr>
-<tr><td>Middleware-пайплайн через array_reduce</td><td>8.2: порядок "матрёшки" предсказан, потом проверен</td><td>тот же Pipeline, что в Laravel-лабе</td></tr>
+<tr><td>Middleware-пайплайн через array_reduce</td><td>8.2: порядок "матрёшки" предсказан, потом проверен</td><td>тот же Pipeline, что в Laravel-лабе (раздел 6, теория / сессия 4, практика)</td></tr>
 <tr><td>Сравнение с Laravel</td><td>8.3</td><td>разница не в алгоритме, а в объёме решённых краевых случаев</td></tr>
 </table>
 
 <h2 id="sec-15"><label class="done-label" title="Отметить раздел пройденным"><input type="checkbox" class="done" data-key="sec-15"></label>15. Глоссарий <a class="anchor" href="#sec-15">#</a></h2>
 <div class="glossary-item" id="g-0"><b>declare(strict_types=1)</b> — директива файла, отключающая неявное приведение типов при вызовах функций ИЗ ЭТОГО файла.</div>
-<div class="glossary-item" id="g-1"><b>TypeError</b> — исключение (точнее, Error) при несовпадении типа аргумента/возврата под strict_types.</div>
+<div class="glossary-item" id="g-1"><b>TypeError</b> — исключение (точнее, Error) при несовпадении типа аргумента/возврата, особенно заметно под strict_types.</div>
 <div class="glossary-item" id="g-2"><b>Copy-on-write (COW)</b> — оптимизация: массив физически копируется не при присваивании, а при первой попытке изменить одну из копий.</div>
 <div class="glossary-item" id="g-3"><b>array_filter / usort</b> — фильтрация с сохранением ключей / сортировка с мутацией и сбросом ключей.</div>
 <div class="glossary-item" id="g-4"><b>mb_* функции</b> — multibyte-безопасные аналоги строковых функций (mb_strlen, mb_substr), корректно работающие с UTF-8.</div>
