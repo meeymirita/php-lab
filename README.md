@@ -26,4 +26,4 @@
 Composer только для автозагрузки — без единого стороннего пакета до
 сессии 7 (где нужен `pdo_pgsql`).
 
-Часть сборного репозитория лабораторных работ — [submodule-group-lab](https://github.com/meeymirita/submodule-group-lab).
+Часть сборного репозитория лабораторных работ — [anitech-performance](https://github.com/meeymirita/anitech-performance).
