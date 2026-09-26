@@ -2,7 +2,7 @@
 
 ![PHP](php.png)
 
-> **24.09.2026 — методичка вычитана и исправлена.** Что найдено и что поправлено — в [fixes/php.md](https://github.com/meeymirita/submodule-group-lab/blob/main/fixes/php.md) сборного репозитория.
+> **24.09.2026 — методичка вычитана и исправлена.** Что найдено и что поправлено — в [fixes/php.md](https://github.com/meeymirita/lab-fixes/blob/main/php.md) репозитория `lab-fixes`.
 
 Чистый PHP 8.4 с нуля: то, что обычно прячет Laravel — автозагрузка,
 свой роутер, свой DI-контейнер, PDO напрямую, сессии/CSRF руками. Домен —
