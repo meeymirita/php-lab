@@ -1,6 +1,6 @@
 # Чистый PHP Lab
 
-![PHP](https://meeymirita-files.storage.yandexcloud.net/php/php.png)
+![PHP](https://raw.githubusercontent.com/meeymirita/works-lab/main/images/php.png)
 
 > **24.09.2026 — методичка вычитана и исправлена.** Что найдено и что поправлено — в [fixes/backend/php.md](https://github.com/meeymirita/lab-fixes/blob/main/backend/php.md) репозитория `lab-fixes`.
 
